@@ -19,13 +19,14 @@ package core.dao;
 import common.dao.GenericDAOHibernate;
 import common.hibernate.HQLPartGenerator;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 //import java.util.logging.Level;
 //import java.util.logging.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.transform.AliasToBeanResultTransformer;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -53,12 +54,13 @@ public class PagesDAOHibernate<T extends core.model.beans.Pages, ID extends Seri
 	 */
 	public static final String[] PAGES_FOR_RELOCATE_PSEUDONYMS = new String[]{"id","id_pages","name"};
 	@Override
+	@Transactional(readOnly = true)
 	public List<T> getPagesForRelocateOrdered(Long id, String[] orderBy, String[] orderHow) {
         if (id==null){
-            return new Vector<T>();
+            return new ArrayList<T>();
         }else{
             //creating table for results
-            Vector<T> rez=new Vector<T>();
+            List<T> rez=new ArrayList<T>();
 			AliasToBeanResultTransformer pagesTransformer = new AliasToBeanResultTransformer(persistentClass);
             //forming HQL-----------------------------------------------------------
             StringBuilder baseHQL=new StringBuilder();
@@ -83,7 +85,7 @@ public class PagesDAOHibernate<T extends core.model.beans.Pages, ID extends Seri
 					temp.remove(i);
 					i--;
 				}else{
-					temp.get(i).setLayer(new Long(0));
+					temp.get(i).setLayer(Long.valueOf(0));
 				}
 			}
 
@@ -117,11 +119,12 @@ public class PagesDAOHibernate<T extends core.model.beans.Pages, ID extends Seri
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<T> getPagesChildrenRecurciveOrderedWhere(String[] properties, String[] propPseudonyms, String[] propertyNames, Object[][] propertyValues,
 			String[] orderBy, String[] orderHow, Long first_id)
 	{
 		//creating table for results
-		Vector<T> rez=new Vector<T>();
+		List<T> rez=new ArrayList<T>();
 		AliasToBeanResultTransformer pagesTransformer = new AliasToBeanResultTransformer(persistentClass);
 		//forming HQL-----------------------------------------------------------
 		StringBuilder baseHQL=new StringBuilder();
@@ -155,7 +158,7 @@ public class PagesDAOHibernate<T extends core.model.beans.Pages, ID extends Seri
 
 		//deleting instance with given id and setting layer
 		for (int i=0;i<temp.size();i++){
-			temp.get(i).setLayer(new Long(0));
+			temp.get(i).setLayer(Long.valueOf(0));
 		}
 
 		//completing hql forming
@@ -188,6 +191,7 @@ public class PagesDAOHibernate<T extends core.model.beans.Pages, ID extends Seri
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public boolean checkRecursion(Long id, Long newIdPages) {
         if (id==null){
             return false;
@@ -216,6 +220,7 @@ public class PagesDAOHibernate<T extends core.model.beans.Pages, ID extends Seri
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<T> getAllParentsRecursive(Long id, String[] propertyNames, String[] propertyAliases) {
         if (id==null||propertyAliases==null||propertyNames==null||propertyNames.length!=propertyAliases.length)
 			return null;
@@ -229,7 +234,7 @@ public class PagesDAOHibernate<T extends core.model.beans.Pages, ID extends Seri
 		String hql = baseHQL.toString();
 		baseHQL = null;
 		//---------------------------------------------------------------
-		Vector<T> rez = new Vector<T>();
+		List<T> rez = new ArrayList<T>();
 		Session sess = this.getSessionFactory().getCurrentSession();
 		AliasToBeanResultTransformer trans = new AliasToBeanResultTransformer(persistentClass);
 
@@ -248,8 +253,9 @@ public class PagesDAOHibernate<T extends core.model.beans.Pages, ID extends Seri
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<Long> getAllActiveChildrenId(Long id, String[] orderBy, String[] orderHow) {
-		Vector<Long> rez = new Vector<Long>();
+		List<Long> rez = new ArrayList<Long>();
 		//forming HQL-----------------------------------------------------------
 		StringBuilder baseHQL=new StringBuilder("SELECT ");
 		baseHQL.append("id");
@@ -265,7 +271,7 @@ public class PagesDAOHibernate<T extends core.model.beans.Pages, ID extends Seri
 			common.hibernate.HQLPartGenerator.getOrderBy(orderBy, orderHow, hql);
 			temp=sess.createQuery(hql.toString()).list();
 		}else{
-			temp=new Vector<Long>(1);
+			temp=new ArrayList<Long>(1);
 			temp.add(id);
 		}
 		//----------------------------------------------------------------------

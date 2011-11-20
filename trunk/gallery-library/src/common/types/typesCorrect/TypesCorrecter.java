@@ -31,7 +31,6 @@ public class TypesCorrecter {
     private TypesCorrecter() {
         //here you need to put all types that you need to check
         types.put("password",new PasswordCorrecter());
-        types.put("float",new FloatCorrecter());
         types.put("text",new TextCorrecter());
         types.put("html",new HtmlCorrecter());
         //types.put("code",new CodeCorrecter());

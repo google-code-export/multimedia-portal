@@ -40,8 +40,10 @@ public class CommonBindValidator extends ABindValidator{
 
 	protected String anti_spam_code;
 
-	protected String[] required_field_arrays;
 	protected String required_field_arrays_marker;
+	protected String[] required_field_arrays;
+	protected String required_vector_name;
+	protected boolean required_field_vector = false;
 
 	/*
 	 * Unused
@@ -61,6 +63,8 @@ public class CommonBindValidator extends ABindValidator{
 		binder.setBindEmptyMultipartFiles(false);
 		binder.setRequiredFields(required_fields);
         binder.setAllowedFields(allowed_fields);
+		binder.setFieldMarkerPrefix("_");
+		binder.setFieldDefaultPrefix("!");
         if (editors!=null){
             Iterator<Entry<String,PropertyEditor>> i = editors.entrySet().iterator();
             while(i.hasNext()){
@@ -68,17 +72,25 @@ public class CommonBindValidator extends ABindValidator{
                 binder.registerCustomEditor(String.class, e.getKey(), e.getValue());
             }
         }
+
         binder.registerCustomEditor(String.class, new StringTrimmerEditor(false));
 	}
 
 	@Override
 	protected void validate(Object command, Errors err, HttpServletRequest request) {
-		if (required_field_arrays_marker!=null){
+		if (required_field_arrays_marker!=null&&required_field_arrays!=null){
 			String[] marker = request.getParameterValues(required_field_arrays_marker);
-			if (marker==null){
-				//err.rejectValue(required_field_arrays_marker,"required");
-			}else{
-				if (required_field_arrays!=null){
+			if (marker!=null){
+				if (required_field_vector){
+					for (int i=0;i<required_field_arrays.length;i++){
+						for (int j=0;j<marker.length;j++){
+							String s = request.getParameter(required_vector_name+"["+marker[j]+"]."+required_field_arrays[i]);
+							if (s==null||s.equals("")){
+								err.rejectValue(required_vector_name+"["+marker[j]+"]", "required");
+							}
+						}
+					}
+				}else{
 					for (int i=0;i<required_field_arrays.length;i++){
 						for (int j=0;j<marker.length;j++){
 							String s = request.getParameter(required_field_arrays[i]+"["+j+"]");
@@ -91,13 +103,11 @@ public class CommonBindValidator extends ABindValidator{
 			}
 		}
 		if (anti_spam_code!=null){
-			String code = request.getParameter(anti_spam_code);
-			if (code!=null&&!code.equals(request.getSession().getAttribute("antiSpamCode")))
-			{
-                err.reject("anti_spam_code.different");
-				common.CommonAttributes.addErrorMessage("anti_spam_code.different",request);
+			String error_code = common.web.filters.Antispam.canAccess(request, request.getParameter(anti_spam_code), true);
+			if (error_code!=null){
+                err.reject(error_code);
+				common.CommonAttributes.addErrorMessage(error_code, request);
 			}
-			request.getSession().removeAttribute("antiSpamCode");
 		}
 	}
 
@@ -122,6 +132,19 @@ public class CommonBindValidator extends ABindValidator{
 	 * @param value parameter
 	 */
 	public void setRequiredFieldArraysMarker(String value){this.required_field_arrays_marker = value;}
+	/**
+	 * if true the required field arrays is vector of beans
+	 * and is binded in form
+	 * required_vector_name[number].required_field_arrays[x]
+	 * default is false
+	 * @param value
+	 */
+	public void setRequiredFieldArraysVector(boolean value){this.required_field_vector = value;}
+	/**
+	 * name of property with vector
+	 * @param value
+	 */
+	public void setRequiredVectorName(String value){this.required_vector_name = value;}
 
 	//public static final String TYPES_SEPARATOR = ",";
 	//public static final String REQUIRED_TYPE = "required";

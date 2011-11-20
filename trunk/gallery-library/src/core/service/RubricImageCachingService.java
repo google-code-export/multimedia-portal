@@ -16,20 +16,20 @@
 
 package core.service;
 
+import com.multimedia.service.wallpaper.IWallpaperService;
 import common.utils.FileUtils;
 import common.utils.ImageUtils;
 import common.utils.image.BufferedImageHolder;
 import core.model.beans.Pages;
-import gallery.model.beans.Photo;
+import gallery.model.beans.Wallpaper;
 import gallery.service.pages.IPagesService;
-import gallery.service.photo.IPhotoService;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import org.apache.log4j.Logger;
-import java.util.Vector;
 import org.springframework.core.io.Resource;
 
 
@@ -49,7 +49,7 @@ public class RubricImageCachingService implements IRubricImageService{
     /** height of created images */
     protected Integer image_height;
 
-    protected IPhotoService photo_service;
+    protected IWallpaperService wallpaper_service;
     protected IPagesService pages_service;
 
     protected Random rnd_gen = new Random();
@@ -61,7 +61,7 @@ public class RubricImageCachingService implements IRubricImageService{
 		common.utils.MiscUtils.checkNotNull(image_quantity, "image_quantity", sb);
 		common.utils.MiscUtils.checkNotNull(image_width, "image_width", sb);
 		common.utils.MiscUtils.checkNotNull(image_height, "image_height", sb);
-		common.utils.MiscUtils.checkNotNull(photo_service, "photo_service", sb);
+		common.utils.MiscUtils.checkNotNull(wallpaper_service, "wallpaper_service", sb);
 		common.utils.MiscUtils.checkNotNull(pages_service, "pages_service", sb);
 		if (sb.length()>0){
 			throw new NullPointerException(sb.toString());
@@ -89,16 +89,16 @@ public class RubricImageCachingService implements IRubricImageService{
     protected boolean generateImages(Pages p, File dst_dir){
         boolean succeed = true;
         List<Long> ids = pages_service.getAllActiveChildrenId(p.getId());
-        List<Photo> photos = photo_service.getMainPhotos(ids, image_quantity);
+        List<Wallpaper> wallpapers = wallpaper_service.getMainImages(ids, image_quantity);
 
-        File src_dir = new File(photo_service.getStorePath(), "full");
+        File src_dir = new File(wallpaper_service.getStorePath(), "full");
         File src;
         File dst;
         BufferedImageHolder holder;
         BufferedImage rez;
-        for (Photo photo:photos){
-            src = new File(src_dir, photo.getName());
-            dst = new File(dst_dir, photo.getName());
+        for (Wallpaper wallpaper:wallpapers){
+            src = new File(src_dir, wallpaper.getName());
+            dst = new File(dst_dir, wallpaper.getName());
             if (src.exists()){
                 try {
                     holder = ImageUtils.readImage(src);
@@ -128,17 +128,17 @@ public class RubricImageCachingService implements IRubricImageService{
     protected boolean generateImages4(Pages p, File dst_dir){
         boolean succeed = true;
         List<Long> ids = pages_service.getAllActiveChildrenId(p.getId());
-        List<Photo> photos = photo_service.getMainPhotos(ids, 4);
+        List<Wallpaper> wallpapers = wallpaper_service.getMainImages(ids, 4);
 
-        File src_dir = new File(photo_service.getStorePath(), "full");
+        File src_dir = new File(wallpaper_service.getStorePath(), "full");
         File src;
         BufferedImageHolder holder;
-		BufferedImage[] src_img = new BufferedImage[photos.size()];
+		BufferedImage[] src_img = new BufferedImage[wallpapers.size()];
         BufferedImage rez;
 		//creating src images
-        for (int i=0;i<photos.size();i++){
-			Photo photo = photos.get(i);
-            src = new File(src_dir, photo.getName());
+        for (int i=0;i<wallpapers.size();i++){
+			Wallpaper wallpaper = wallpapers.get(i);
+            src = new File(src_dir, wallpaper.getName());
             if (src.exists()){
                 try {
                     holder = ImageUtils.readImage(src);
@@ -199,7 +199,7 @@ public class RubricImageCachingService implements IRubricImageService{
 	 */
     @Override
     public List<String> getImageUrls(List<? extends Pages> list) {
-        Vector<String> rez = new Vector<String>(list.size());
+        List<String> rez = new LinkedList<String>();
         for (Pages p:list){rez.add(getImageUrl(p));}
         return rez;
     }
@@ -237,9 +237,9 @@ public class RubricImageCachingService implements IRubricImageService{
         File dst_dir = new File(path);
         List<gallery.model.beans.Pages> pages;
         if (id==null){
-            pages = pages_service.getShortByPropertyValueOrdered(PAGES_NAMES, "type", gallery.web.controller.pages.types.WallpaperGalleryType.TYPE, null, null);
+            pages = pages_service.getByPropertyValueOrdered(PAGES_NAMES, "type", gallery.web.controller.pages.types.WallpaperGalleryType.TYPE, null, null);
         }else{
-            pages = pages_service.getShortByPropertyValueOrdered(PAGES_NAMES, "id", id, null, null);
+            pages = pages_service.getByPropertyValueOrdered(PAGES_NAMES, "id", id, null, null);
         }
 		createFolders(dst_dir, pages);
         for (Pages p:pages){
@@ -277,6 +277,6 @@ public class RubricImageCachingService implements IRubricImageService{
     public void setImage_quantity(Short value){this.image_quantity = value;}
     public void setImage_width(Integer value){this.image_width = value;}
     public void setImage_height(Integer value){this.image_height = value;}
-    public void setPhotoService(IPhotoService value){this.photo_service = value;}
+    public void setWallpaperService(IWallpaperService value){this.wallpaper_service = value;}
     public void setPagesService(IPagesService value){this.pages_service = value;}
 }

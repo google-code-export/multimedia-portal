@@ -17,22 +17,19 @@
 package gallery.model.beans;
 
 
-import gallery.web.controller.pages.types.APagesType;
+import com.multimedia.core.pages.types.APagesType;
+import com.multimedia.model.beans.PagesFolder;
 import java.util.List;
-import java.util.Vector;
 
 public class Pages extends core.model.beans.Pages {
 
-    private List<PagesPseudonym> pseudonyms = new Vector(0);
-    private List<Photo> photos = new Vector(0);
+    private List<PagesPseudonym> pseudonyms;
     private Integer pseudonyms_count;
-    private Integer photo_count;
+    private Integer wallpaper_count;
     private Boolean optimized;
+	private PagesFolder pagesFolder;
 
     public Pages() {}
-
-    public List<Photo> getPhotos() {return this.photos;}
-    public void setPhotos(List<Photo> photos) {this.photos = photos;}
 
 	public List<PagesPseudonym> getPseudonyms() {return pseudonyms;}
 	public void setPseudonyms(List<PagesPseudonym> pseudonyms) {this.pseudonyms = pseudonyms;}
@@ -40,11 +37,14 @@ public class Pages extends core.model.beans.Pages {
     public Integer getPseudonymsCount() {return pseudonyms_count;}
     public void setPseudonymsCount(Integer pseudonyms_count) {this.pseudonyms_count = pseudonyms_count;}
 
-    public Integer getPhotoCount() {return photo_count;}
-    public void setPhotoCount(Integer photo_count) {this.photo_count = photo_count;}
+    public Integer getWallpaperCount() {return wallpaper_count;}
+    public void setWallpaperCount(Integer value) {this.wallpaper_count = value;}
 
     public Boolean getOptimized() {return optimized;}
     public void setOptimized(Boolean optimized) {this.optimized = optimized;}
+
+    public PagesFolder getPagesFolder() {return pagesFolder;}
+    public void setPagesFolder(PagesFolder pagesFolder) {this.pagesFolder = pagesFolder;}
 
 	private String module_name = null;
 	public String getModuleName(){return module_name==null?(module_name=APagesType.modules.get(getType())):module_name;}

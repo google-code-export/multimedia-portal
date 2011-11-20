@@ -23,6 +23,7 @@ import gallery.service.resolution.IResolutionService;
 import gallery.web.controller.resolution.Config;
 import gallery.web.controller.resolution.Validation;
 import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
@@ -64,16 +65,16 @@ public class ResolutionCmsDelegate {
 
 	public ModelAndView doView(HttpServletRequest req, HttpServletResponse resp){
 		//logger.fine("do=view");
-		HashMap m = getCommonModel(req);
+		Map<String, Object> m = getCommonModel(req);
 		m.put(config.getContentUrlAttribute(), show_url);
-		m.put("resolutions", service.getAllShortOrdered(null, Config.ORDER_BY, Config.ORDER_HOW));
+		m.put("resolutions", service.getOrdered(null, Config.ORDER_BY, Config.ORDER_HOW));
 
         return new ModelAndView(config.getTemplateUrl(), m);
     }
 
 	public static final String[] REQUIRED_FIELDS = new String[]{"width","height"};
 	public ModelAndView doInsert(HttpServletRequest req, HttpServletResponse resp/*, Pages command*/){
-		HashMap m = getCommonModel(req);
+		Map<String, Object> m = getCommonModel(req);
 		m.put(config.getContentUrlAttribute(), insert_url);
 		m.put("editForm_topHeader", "Добавление");
 
@@ -140,8 +141,8 @@ public class ResolutionCmsDelegate {
         return doView(req, resp);
     }
 
-	public HashMap getCommonModel(HttpServletRequest req){
-		HashMap m = new HashMap();
+	public Map<String, Object> getCommonModel(HttpServletRequest req){
+		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("title","Разрешения");
 		m.put("top_header","Разрешения");
 

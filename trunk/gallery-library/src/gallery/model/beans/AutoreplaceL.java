@@ -16,24 +16,23 @@
 
 package gallery.model.beans;
 
+import com.netstorm.localization.LocalizedBean;
 import java.io.Serializable;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public class AutoreplaceL implements Serializable{
+public class AutoreplaceL extends LocalizedBean<Autoreplace> implements Serializable{
 	private Long id;
 
-	private Long id_rel;
+	//private Long id_rel;
 	private String lang;
 
 	private String text;
 
-	private Autoreplace parent;
-
-	public Long getId_rel() {return id_rel;}
-	public void setId_rel(Long id_rel) {this.id_rel = id_rel;}
+	/*public Long getId_rel() {return id_rel;}
+	public void setId_rel(Long id_rel) {this.id_rel = id_rel;}*/
 
 	public String getLang() {return lang;}
 	public void setLang(String lang) {this.lang = lang;}
@@ -41,15 +40,12 @@ public class AutoreplaceL implements Serializable{
 	public String getText() {return text;}
 	public void setText(String text) {this.text = text;}
 
-	public Autoreplace getParent() {return parent;}
-	public void setParent(Autoreplace parent) {this.parent = parent;}
-
 	public Long getId() {return id;}
 	public void setId(Long id) {this.id = id;}
 
 	@Override
 	public String toString() {
-		return getClass().getName()+"("+(id==null?"":id.toString())+"), ("+(parent==null?"":parent.toString())+"), text = "+text;
+		return getClass().getName()+"("+(id==null?"":id.toString())+"), ("+(localeParent==null?"":localeParent.toString())+"), text = "+text;
 	}
 
 }

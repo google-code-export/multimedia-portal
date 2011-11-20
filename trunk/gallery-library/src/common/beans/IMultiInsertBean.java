@@ -22,7 +22,7 @@ import common.services.IInsertService;
  *
  * @author demchuck.dima@gmail.com
  */
-public interface IMultiInsertBean {
+public interface IMultiInsertBean<T> {
 	/**
 	 * saves to database using an appropriate method :)
 	 * actually you must just specify fields for update
@@ -30,7 +30,7 @@ public interface IMultiInsertBean {
 	 * @param service used for saving
 	 * @return rows updated
 	 */
-	public int save(IInsertService service);
+	public int save(IInsertService<T> service);
 
 	//TODO ... rework this 
 	/**

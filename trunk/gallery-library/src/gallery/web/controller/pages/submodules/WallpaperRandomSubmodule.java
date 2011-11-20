@@ -16,8 +16,8 @@
 
 package gallery.web.controller.pages.submodules;
 
-import gallery.model.beans.Photo;
-import gallery.service.photo.IPhotoService;
+import com.multimedia.service.wallpaper.IWallpaperService;
+import gallery.model.beans.Wallpaper;
 import java.util.List;
 
 /**
@@ -25,14 +25,15 @@ import java.util.List;
  * @author demchuck.dima@gmail.com
  */
 public class WallpaperRandomSubmodule extends ASubmodule{
-	protected IPhotoService photo_service;
+	protected IWallpaperService wallpaper_service;
 
-	public WallpaperRandomSubmodule(IPhotoService photo_service){
-		this.photo_service = photo_service;
+	public WallpaperRandomSubmodule(IWallpaperService wallpaper_service){
+		this.wallpaper_service = wallpaper_service;
 	}
 
-	public List<Photo> getData(){
-		return photo_service.getRandomPhotos(8);
+	public List<Wallpaper> getData(){
+		//return wallpaper_service.getRandomWallpapers(8);
+		return null;
 	}
 
 	@Override

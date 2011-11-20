@@ -21,35 +21,34 @@ package common.beans;
  * @author demchuck.dima@gmail.com
  */
 public class StatisticsBean {
-	private long total_time;
-	private long total_time_handle;
-	private long total_time_view;
-	private long total_count;
-	private double avg_time;
-	private double avg_time_handle;
-	private double avg_time_view;
+	private long total_time = 0;
+	private long total_count = 0;
+	//private double avg_time = 0;
 
-	public StatisticsBean(long total_time, long total_count, long handle_time, long view_time){
-		this.total_count = total_count;
-		this.total_time = total_time;
-		this.total_time_handle = handle_time;
-		this.total_time_view = view_time;
+	private long time_start;
 
-		double total_count2 = total_count;
+	public StatisticsBean(long time_start){this.time_start = time_start;}
 
-		avg_time = total_time;
-		avg_time = avg_time / total_count2;
-		avg_time_handle = handle_time;
-		avg_time_handle = avg_time_handle / total_count2;
-		avg_time_view = view_time;
-		avg_time_view = avg_time_view / total_count2;
+	/**
+	 * increases total_time, total_count by given value and recalculates avg_time
+	 * @param time
+	 * @param count
+	 */
+	public synchronized void increaseStat(long time, long count){
+		total_count += count;
+		total_time += time;
+		//avg_time = total_time / total_count;
 	}
 
-	public long getTotal_time() {return total_time;}
-	public long getTotal_time_handle() {return total_time_handle;}
-	public long getTotal_time_view() {return total_time_view;}
-	public long getTotal_count() {return total_count;}
-	public double getAvg_time() {return avg_time;}
-	public double getAvg_time_handle() {return avg_time_handle;}
-	public double getAvg_time_view() {return avg_time_view;}
+	/**
+	 * increases total_time by given value and total_count by 1 and recalculates avg_time
+	 * @param time
+	 */
+	public synchronized void increaseStat(long time){increaseStat(time, 1);}
+
+	public synchronized long getTotal_time() {return total_time;}
+	public synchronized long getTotal_count() {return total_count;}
+	//public synchronized double getAvg_time() {return avg_time;}
+	//public long getTime_working(){return common.web.filters.StatisticFilter.getTime() - time_start;}
+	public synchronized double getPercent_working(){return ((double)total_time*100)/(common.web.filters.StatisticFilter.getTime() - time_start);}
 }

@@ -16,10 +16,9 @@
 
 package gallery.model.active;
 
+import com.multimedia.model.beans.Locale;
 import common.services.IServiceBean;
 import common.services.generic.IGenericService;
-import com.netstorm.localization.Locale;
-import gallery.service.locale.Config;
 import java.util.List;
 import java.util.Vector;
 
@@ -72,18 +71,18 @@ public class LocalesServiceBean implements IServiceBean{
 	public Object getData() {
 		List<String> locales;
 		if (only_active){
-			locales = (List)service.getSingleProperty("name", WHERE_PROPERTIES, new Object[]{Boolean.TRUE}, 0, 0, Config.ORDER_BY, Config.ORDER_HOW);
+			locales = (List<String>)service.getSingleProperty("name", WHERE_PROPERTIES, new Object[]{Boolean.TRUE}, 0, 0, com.multimedia.config.LocaleConfig.ORDER_BY, com.multimedia.config.LocaleConfig.ORDER_HOW);
 		} else {
-			locales = (List)service.getSingleProperty("name", null, null, 0, 0, Config.ORDER_BY, Config.ORDER_HOW);
+			locales = (List<String>)service.getSingleProperty("name", null, null, 0, 0, com.multimedia.config.LocaleConfig.ORDER_BY, com.multimedia.config.LocaleConfig.ORDER_HOW);
 		}
 
 		if (locales==null){
 			return null;
 		}else{
-			List<com.netstorm.localization.Locale> rez = new Vector<com.netstorm.localization.Locale>(locales.size()+1);
-			com.netstorm.localization.Locale tmp;
+			List<Locale> rez = new Vector<Locale>(locales.size()+1);
+			Locale tmp;
 			for (int i=0;i<locales.size();i++){
-				tmp = new com.netstorm.localization.Locale();
+				tmp = new Locale();
 				tmp.setName(locales.get(i));
 				if (tmp.getName().equals(default_locale.getLanguage())){
 					tmp.setPath(sub_path);

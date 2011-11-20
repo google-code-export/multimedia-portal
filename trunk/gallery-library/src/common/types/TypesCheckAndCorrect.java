@@ -33,11 +33,8 @@ public class TypesCheckAndCorrect {
     private TypesCheckAndCorrect() {
         //checkers
         check.put("email",new EmailChecker());
-        check.put("integer",new IntegerChecker());
         check.put("phone",new PhoneChecker());
-        check.put("login",new LoginChecker());
         check.put("password",new PasswordChecker());
-        check.put("float",new FloatChecker());
         check.put("text",new TextChecker());
         check.put("html",new HtmlChecker());
         check.put("url",new UrlChecker());
@@ -45,7 +42,6 @@ public class TypesCheckAndCorrect {
         check.put("intArray",new IntArrayChecker());
         //correcters
         correct.put("password",new PasswordCorrecter());
-        correct.put("float",new FloatCorrecter());
         correct.put("text",new TextCorrecter());
         correct.put("html",new HtmlCorrecter());
     }

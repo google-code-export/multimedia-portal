@@ -16,14 +16,15 @@
 
 package gallery.web.controller.pages.types;
 
-import common.beans.KeepParameters;
-import gallery.service.photo.IPhotoService;
+import com.multimedia.core.pages.types.APagesType;
+import com.multimedia.service.wallpaper.IWallpaperService;
 import gallery.service.resolution.IResolutionService;
 import gallery.web.controller.pages.filters.WallpaperResolutionFilter;
 import gallery.web.controller.pages.submodules.ASubmodule;
 import gallery.web.controller.pages.submodules.WallpaperRandomSubmodule;
 import gallery.web.controller.pages.submodules.WallpaperTagCloudSubmodule;
 import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,21 +34,19 @@ import javax.servlet.http.HttpServletResponse;
  */
 public abstract class AWallpaperType extends APagesType{
 	//TODO: make some config and add it to all children of this superclass
-	protected IPhotoService photoService;
+	protected IWallpaperService wallpaperService;
 	protected IResolutionService resolutionService;
-	protected KeepParameters moduleKeepParameters;
 
 	protected AWallpaperType(){
-		moduleKeepParameters = new KeepParameters(new String[]{"id_resolution_nav"});
 	}
 
 	@Override
 	public void init() {
 		super.init();
 		StringBuilder sb = new StringBuilder();
-		common.utils.MiscUtils.checkNotNull(photoService, "photoService", sb);
+		common.utils.MiscUtils.checkNotNull(wallpaperService, "wallpaperService", sb);
 		common.utils.MiscUtils.checkNotNull(resolutionService, "resolutionService", sb);
-		common.utils.MiscUtils.checkNotNull(moduleKeepParameters, "moduleKeepParameters", sb);
+		//common.utils.MiscUtils.checkNotNull(moduleKeepParameters, "moduleKeepParameters", sb);
 		if (sb.length()>0){
 			throw new NullPointerException(sb.toString());
 		}
@@ -57,10 +56,10 @@ public abstract class AWallpaperType extends APagesType{
 	 * get submodules that will be added to request if an appropriate module is found
 	 * @return map of submodules
 	 */
-	protected HashMap getCommonSubmodules(HttpServletRequest request){
+	protected Map<String, ASubmodule> getCommonSubmodules(HttpServletRequest request){
             HashMap<String, ASubmodule> hs = new HashMap<String, ASubmodule>();
-            hs.put(gallery.web.controller.pages.types.WallpaperRandomType.TYPE, new WallpaperRandomSubmodule(photoService));
-			hs.put(gallery.web.controller.pages.types.WallpaperTagCloudType.TYPE, new WallpaperTagCloudSubmodule(photoService, request));
+            hs.put(gallery.web.controller.pages.types.WallpaperRandomType.TYPE, new WallpaperRandomSubmodule(wallpaperService));
+			hs.put(gallery.web.controller.pages.types.WallpaperTagCloudType.TYPE, new WallpaperTagCloudSubmodule(wallpaperService, request));
 			return hs;
 	}
 
@@ -70,12 +69,12 @@ public abstract class AWallpaperType extends APagesType{
 	{	
 		UrlBean url = new UrlBean();
 		url.setSubmodules(getCommonSubmodules(request));
-		WallpaperResolutionFilter sub = new WallpaperResolutionFilter(resolutionService, photoService, request);
+		WallpaperResolutionFilter sub = new WallpaperResolutionFilter(resolutionService, wallpaperService, request);
 		request.setAttribute(sub.getFilterName(), sub);
 		sub.enableFilters();
 		process(request, response, url);
 		sub.disableFilters();
-		request.setAttribute(gallery.web.controller.pages.Config.PAGE_KEEP_PARAMETERS, moduleKeepParameters.getKeepParameters(request));
+		//request.setAttribute(gallery.web.controller.pages.Config.PAGE_KEEP_PARAMETERS, sub.getQueryParam());
 		return url;
 	}
 
@@ -88,6 +87,6 @@ public abstract class AWallpaperType extends APagesType{
 	public abstract void process(HttpServletRequest request, HttpServletResponse response, UrlBean url)
 		throws Exception;
 
-	public void setPhotoService(IPhotoService service) {this.photoService = service;}
+	public void setWallpaperService(IWallpaperService service) {this.wallpaperService = service;}
 	public void setResolutionService(IResolutionService service) {this.resolutionService = service;}
 }

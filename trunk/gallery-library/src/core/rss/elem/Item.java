@@ -12,7 +12,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  under the License.
  */
 
 package core.rss.elem;
@@ -33,7 +32,7 @@ public class Item {
     private String description;
 
     private String author;
-    private List categories;
+    private List<Item.Category> categories;
     private String comments;
     private Enclosure enclosure;
     private Guid guid;
@@ -65,7 +64,7 @@ public class Item {
         this.title = title;
         this.link = link;
         this.description = description;
-        this.categories = new ArrayList();
+        this.categories = new ArrayList<Item.Category>();
     }
     
     /** Gets the email address of the author of the item
@@ -187,7 +186,7 @@ public class Item {
     /** Gets the item's categories
      * @return Returns the categories.
      */
-    public List getCategories() {
+    public List<Item.Category> getCategories() {
         return categories;
     }
     /** Adds a category that the item belongs to.

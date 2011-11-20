@@ -49,7 +49,7 @@ public class WallpaperRandomType extends AWallpaperType{
 	public void process(HttpServletRequest request, HttpServletResponse response, UrlBean url)
 			throws Exception
 	{
-		request.setAttribute(config.getContentDataAttribute(), photoService.getRandomPhotos(15));
+		request.setAttribute(config.getContentDataAttribute(), wallpaperService.getRandomWallpapers(15));
 
 		url.setContent(contentUrl);
 

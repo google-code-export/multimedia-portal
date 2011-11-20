@@ -16,9 +16,10 @@
 
 package gallery.service.pages;
 
-import gallery.model.beans.Counter;
+import com.multimedia.model.beans.Counter;
 import gallery.model.beans.Pages;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -26,5 +27,6 @@ import java.util.List;
  */
 public interface IPagesServiceView {
 	public List<Counter> getCounters();
+	public Map<String, String> getAdvertisementForPage(Long id);
     public Pages getMainPage();
 }

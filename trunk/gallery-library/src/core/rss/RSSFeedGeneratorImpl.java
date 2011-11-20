@@ -12,7 +12,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  under the License.
  */
 
 package core.rss;
@@ -36,12 +35,14 @@ import core.rss.elem.Item;
 import core.rss.elem.RSS;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import org.apache.log4j.Logger;
 import org.apache.xml.serialize.LineSeparator;
 
 /**
  * @author Henrique A. Viecili
  */
 public class RSSFeedGeneratorImpl implements RSSFeedGenerator {
+	protected static Logger logger = Logger.getLogger(RSSFeedGeneratorImpl.class);
     
     /* (non-Javadoc)
      * @see viecili.jrss.generator.RSSFeedGenerator#generateToFile(viecili.jrss.generator.elem.RSS, java.io.File)
@@ -54,7 +55,7 @@ public class RSSFeedGeneratorImpl implements RSSFeedGenerator {
         format.setLineSeparator(LineSeparator.Web);
 		format.setEncoding(encoding);
         format.setIndenting(true);
-        format.setPreserveSpace(false);//TODO remove after testing
+        format.setPreserveSpace(false);
 		FileOutputStream fos = new FileOutputStream(xmlFile);
 		OutputStreamWriter osw = new OutputStreamWriter(fos, encoding);
         XMLSerializer serializer = new XMLSerializer (osw, format);
@@ -392,11 +393,9 @@ public class RSSFeedGeneratorImpl implements RSSFeedGenerator {
             }
             doc.appendChild(root);
         } catch (ParserConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+			logger.error(e);
         } catch (FactoryConfigurationError e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+			logger.error(e);
         }
         return doc;
     }

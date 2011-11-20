@@ -24,7 +24,7 @@ import org.springframework.web.servlet.ModelAndView;
  * like simple but provides filtering functionality instead of show all cms
  * @author demchuck.dima@gmail.com
  */
-public class FilteredCmsDelegate extends SimpleCmsDelegate{
+public class FilteredCmsDelegate<T> extends SimpleCmsDelegate<T>{
 	/**
 	 * must show items associated with this table
 	 * that matches given criteria

@@ -16,10 +16,11 @@
 
 package common.services.generic;
 
+import java.io.Serializable;
+
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public interface IGenericLocalizedService {
-
+public interface IGenericLocalizedService<T, ID extends Serializable> extends IGenericService<T, ID> {
 }

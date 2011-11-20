@@ -23,6 +23,6 @@ import common.services.generic.GenericServiceImpl;
  *
  * @author demchuck.dima@gmail.com
  */
-public class ResolutionServiceImpl extends GenericServiceImpl<Resolution, Long> implements IResolutionService<Resolution, Long>{
+public class ResolutionServiceImpl extends GenericServiceImpl<Resolution, Long> implements IResolutionService{
 
 }

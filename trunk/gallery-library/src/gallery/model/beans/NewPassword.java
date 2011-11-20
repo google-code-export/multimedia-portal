@@ -61,7 +61,7 @@ public class NewPassword  implements java.io.Serializable {
 	 * @return context relative url for recovering password
 	 */
 	public String getUrl(){
-		return "/index.htm?id_pages_nav="+id_pages_nav+"&"+gallery.service.newPassword.Config.CODE_PARAM_NAME+"="+code;
+		return "/index.htm?id_pages_nav="+id_pages_nav+"&amp;"+gallery.service.newPassword.Config.CODE_PARAM_NAME+"="+code;
 	}
 
 }

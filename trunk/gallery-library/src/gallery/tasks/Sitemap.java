@@ -19,10 +19,7 @@ package gallery.tasks;
 import gallery.service.sitemap.ISitemapService;
 import java.util.TimerTask;
 import org.apache.log4j.Logger;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.orm.hibernate3.SessionHolder;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  *
@@ -42,19 +39,19 @@ public class Sitemap extends TimerTask{
 
 	@Override
 	public void run() {
-		Session sess = sessionFactory.openSession();
+		/*Session sess = sessionFactory.openSession();
 		sess.beginTransaction();
-		TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(sess));
+		TransactionSynchronizationManager.bindResource(sessionFactory, new SessionHolder(sess));*/
 
-		Exception ex = null;
+		//Exception ex = null;
 		try {
 			sitemap_service.createSitemap();
 		} catch (Exception e){
 			log.error("after the request", e);
-			ex = e;
+		//	ex = e;
 		}
 
-		try {
+		/*try {
 			sess = sessionFactory.getCurrentSession();
 			if (ex==null){
 				sess.getTransaction().commit();
@@ -67,10 +64,10 @@ public class Sitemap extends TimerTask{
 		}finally{
 			try{
 				if(sess.isOpen()){sess.close();}
-			}catch(Exception e){/*do nothing*/}
+			}catch(Exception e){}
 			TransactionSynchronizationManager.unbindResource(sessionFactory);
 			//TransactionSynchronizationManager.clearSynchronization();
 			//log.debug("resource is unbunded");
-		}
+		}*/
 	}
 }

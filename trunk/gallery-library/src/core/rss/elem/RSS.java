@@ -12,7 +12,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  under the License.
  */
 
 package core.rss.elem;
@@ -38,7 +37,7 @@ public class RSS {
     public static final String DEFAULT_VERSION = VERSION_2_0;
     
     private String version;
-    private List channels;
+    private List<Channel> channels;
     
     /**
      * The RSS constructor with default version
@@ -56,7 +55,7 @@ public class RSS {
         if(!VERSION_2_0.equals(version))
             throw new InvalidRequiredParamException("version invalid: "+version);
         this.version = version;
-        this.channels = new ArrayList();
+        this.channels = new ArrayList<Channel>();
     }
     /** Gets this RSS Feed version
      * @return Returns the version.

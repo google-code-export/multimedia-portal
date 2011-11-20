@@ -16,6 +16,7 @@
 
 package gallery.web.controller.pages.types;
 
+import com.multimedia.core.pages.types.IPagesType;
 import javax.servlet.http.HttpServletRequest;
 
 /**

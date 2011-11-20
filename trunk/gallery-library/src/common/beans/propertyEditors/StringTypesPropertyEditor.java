@@ -20,14 +20,14 @@ import common.types.TypesCheckAndCorrect;
 import common.types.typesCheck.classes.ITypeChecker;
 import common.types.typesCorrect.classes.ITypeCorrecter;
 import java.beans.PropertyEditorSupport;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
 public class StringTypesPropertyEditor extends PropertyEditorSupport{
-	private Logger logger = Logger.getLogger(getClass());
+	//private Logger logger = Logger.getLogger(getClass());
 	protected ITypeChecker checker;
 	protected ITypeCorrecter correcter;
 	protected boolean required;

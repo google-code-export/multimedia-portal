@@ -16,17 +16,18 @@
 
 package gallery.service.sitemap;
 
+import com.multimedia.service.wallpaper.IWallpaperService;
 import core.sitemap.model.Index;
 import core.sitemap.model.Sitemap;
 import gallery.model.beans.Pages;
 import gallery.service.pages.IPagesService;
-import gallery.service.photo.IPhotoService;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.core.io.Resource;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -36,7 +37,7 @@ public class SitemapServiceImpl implements ISitemapService{
 	Logger logger = Logger.getLogger(SitemapServiceImpl.class.getName());
 
     protected IPagesService pages_service;
-    protected IPhotoService photo_service;
+    protected IWallpaperService wallpaper_service;
 	protected String path;
 	protected String path_tmp;
 	private boolean generating;
@@ -44,7 +45,7 @@ public class SitemapServiceImpl implements ISitemapService{
 	public void init(){
 		StringBuilder sb = new StringBuilder();
 		common.utils.MiscUtils.checkNotNull(pages_service, "pages_service", sb);
-		common.utils.MiscUtils.checkNotNull(photo_service, "photo_service", sb);
+		common.utils.MiscUtils.checkNotNull(wallpaper_service, "wallpaper_service", sb);
 		common.utils.MiscUtils.checkNotNull(path, "path", sb);
 		common.utils.MiscUtils.checkNotNull(path_tmp, "path_tmp", sb);
 		if (sb.length()>0){
@@ -55,6 +56,7 @@ public class SitemapServiceImpl implements ISitemapService{
     protected static final String[] SITEMAP_NAMES = new String[]{"id","last", "type"};
     protected static final String[] SITEMAP_WHERE = new String[]{"id_pages","active"};
     @Override
+	@Transactional(readOnly=true)
     public void createSitemap() {
 		if (generating){
 			logger.info("xml is allready generating ...");
@@ -67,11 +69,10 @@ public class SitemapServiceImpl implements ISitemapService{
 			File base = new File(path_tmp);
 			try {
 				if (base.exists()){
-					//TODO: set sitename here
 					Index index = new Index(10000, base, gallery.web.Config.SITE_NAME);
 					Sitemap sitemap = index.getChild();
 
-					List<Pages> pages = pages_service.getShortByPropertiesValueOrdered(SITEMAP_NAMES, SITEMAP_WHERE, new Object[]{null, Boolean.TRUE}, null, null);
+					List<Pages> pages = pages_service.getByPropertiesValueOrdered(SITEMAP_NAMES, SITEMAP_WHERE, new Object[]{null, Boolean.TRUE}, null, null);
 					LinkedList<Long> pages_unhandled = new LinkedList<Long>();
 					int k = 0;
 					while (k<pages.size()){
@@ -83,14 +84,14 @@ public class SitemapServiceImpl implements ISitemapService{
 							//check type
 							if (p.getType().equals(gallery.web.controller.pages.types.WallpaperGalleryType.TYPE)){
 								Long id_pages = p.getId();
-								List ids = photo_service.getSingleProperty("id", SITEMAP_WHERE, new Object[]{id_pages, Boolean.TRUE}, 0, 0, null, null);
+								List ids = wallpaper_service.getSingleProperty("id", SITEMAP_WHERE, new Object[]{id_pages, Boolean.TRUE}, 0, 0, null, null);
 								int j=0;
 								for (int i=0;i<ids.size();i=i+gallery.web.controller.pages.types.WallpaperGalleryType.CATEGORY_WALLPAPERS){
 									sitemap.addRecord("index.htm?id_pages_nav="+id_pages+"&amp;page_number="+j, "daily", "0.9");
 									j++;
 								}
-								for (Object id_photo:ids){
-									sitemap.addRecord("index.htm?id_pages_nav="+id_pages+"&amp;id_photo_nav="+id_photo, "daily", "0.7");
+								for (Object id_wallpaper:ids){
+									sitemap.addRecord("index.htm?id_pages_nav="+id_pages+"&amp;id_photo_nav="+id_wallpaper, "daily", "0.7");
 								}
 							} else {
 								sitemap.addRecord("index.htm?id_pages_nav="+p.getId(), "daily", "0.9");
@@ -98,7 +99,7 @@ public class SitemapServiceImpl implements ISitemapService{
 						}
 						k++;
 						if ((k>=pages.size())&&(!pages_unhandled.isEmpty())){
-							pages = pages_service.getShortByPropertiesValueOrdered(SITEMAP_NAMES,
+							pages = pages_service.getByPropertiesValueOrdered(SITEMAP_NAMES,
 									SITEMAP_WHERE, new Object[]{pages_unhandled.removeFirst(), Boolean.TRUE},
 									null, null);
 							k=0;
@@ -167,5 +168,5 @@ public class SitemapServiceImpl implements ISitemapService{
 		//System.out.println("----------------------------path = "+this.path);
 	}
 	public void setPages_service(IPagesService value){this.pages_service = value;}
-	public void setPhoto_service(IPhotoService value){this.photo_service = value;}
+	public void setWallpaper_service(IWallpaperService value){this.wallpaper_service = value;}
 }

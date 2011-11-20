@@ -18,12 +18,13 @@ package common.services;
 
 import common.beans.IMultiupdateBean;
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public interface IMultiupdateService<ID extends Serializable> {
+public interface IMultiupdateService<T, ID extends Serializable> {
 	/**
 	 * updated some properties of entities
 	 * WARNING entities must have an id not null
@@ -35,10 +36,17 @@ public interface IMultiupdateService<ID extends Serializable> {
 	public int updateObjectArrayShortById(String[] propertyNames,ID[] idValues,Object[]... propertyValues);
 
 	/**
+	 * this method saes or updates collection of entities
+	 * @param c collection
+	 * @return quantity of updated records
+	 */
+	public int saveOrUpdateCollection(Collection<T> c);
+
+	/**
 	 * bean that will be used for binding values on it
 	 *  and then saved to database
 	 * @param size if there is a need of precreate some arrays, collections ...
 	 * @return an object for multi update
 	 */
-	public IMultiupdateBean getMultiupdateBean(int size);
+	public IMultiupdateBean<T, ID> getMultiupdateBean(int size);
 }

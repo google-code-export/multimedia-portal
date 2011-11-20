@@ -16,12 +16,13 @@
 
 package gallery.web.controller.pages.filters;
 
+import com.multimedia.service.wallpaper.IWallpaperService;
 import common.utils.RequestUtils;
 import gallery.model.beans.Resolution;
-import gallery.service.photo.IPhotoService;
 import gallery.service.resolution.IResolutionService;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
@@ -32,25 +33,44 @@ import net.sf.ehcache.Element;
  */
 public class WallpaperResolutionFilter implements IFilter{
 	protected static final String NAME = "WallpaperResolutionFilter";
+	protected static final String SESSION_KEY = "WallpaperResolution";
+	protected static final Long REMOVE_VALUE = Long.valueOf(0);
 	public static final String REGION_KEY = "wallpaper_resolutions";
 
-	String query_param;
-	Long id_resolution_nav;
-	Ehcache cache;
+	protected Long id_resolution_nav;
+	protected Ehcache cache;
 
-	protected IResolutionService<Resolution, Long> resolutionService;
-	protected IPhotoService photoService;
+	protected Resolution cur_resolution;
+	protected List<Resolution> resolutions;
 
-	public WallpaperResolutionFilter(IResolutionService service, IPhotoService photo_service, HttpServletRequest request){
+	protected IResolutionService resolutionService;
+	protected IWallpaperService wallpaperService;
+
+	public WallpaperResolutionFilter(IResolutionService service, IWallpaperService wallpaper_service, HttpServletRequest request){
 		this.resolutionService = service;
-		this.photoService = photo_service;
+		this.wallpaperService = wallpaper_service;
 		id_resolution_nav = RequestUtils.getLongParam(request, "id_resolution_nav");
+		HttpSession sess = request.getSession();
 		if (id_resolution_nav == null){
-			this.query_param = null;
-		}else{
-			this.query_param = "&id_resolution_nav="+id_resolution_nav;
+			id_resolution_nav = (Long) sess.getAttribute(SESSION_KEY);
 		}
-		cache = CacheManager.getInstance().getCache(REGION_KEY);
+		if (id_resolution_nav != null){
+			//TODO: optimize, or mb cash results or mb xz
+			if (id_resolution_nav.equals(REMOVE_VALUE)){
+				this.id_resolution_nav = null;
+				this.cur_resolution = null;
+			}else{
+				this.cur_resolution = resolutionService.getById(id_resolution_nav);
+				if (cur_resolution == null){
+					this.id_resolution_nav = null;
+				}
+			}
+		} else {
+			this.cur_resolution = null;
+		}
+		sess.setAttribute(SESSION_KEY, id_resolution_nav);
+
+		cache = CacheManager.getInstance().getEhcache(REGION_KEY);//TODO: replace with non singleton instance
 		if (cache==null){
 			throw new NullPointerException("no cache region defined for: "+REGION_KEY);
 		}
@@ -60,34 +80,38 @@ public class WallpaperResolutionFilter implements IFilter{
 	public void enableFilters(){
 		if (id_resolution_nav!=null){
 			Resolution r = resolutionService.getById(id_resolution_nav);
-			photoService.enableResolutionFilter(r.getWidth(), r.getHeight());
+			wallpaperService.enableResolutionFilter(r.getWidth(), r.getHeight());
 		}
 	}
 
 	@Override
 	public void disableFilters(){
 		if (id_resolution_nav!=null){
-			photoService.disableResolutionFilter();
+			wallpaperService.disableResolutionFilter();
 		}
 	}
 
+	public Resolution getCurrent(){return cur_resolution;}
+
 	public List<Resolution> getData(){
-		Element resolutions = cache.get(REGION_KEY);
-		List<Resolution> rez;
-		if (resolutions==null||resolutions.getObjectValue()==null){
-			rez = resolutionService.getShortByPropertyValueOrdered(null, null, null,
-					gallery.web.controller.resolution.Config.ORDER_BY, gallery.web.controller.resolution.Config.ORDER_HOW);
-			cache.put(new Element(REGION_KEY, rez));
-			//System.out.println("WallpaperResolutionSubmodule from DB");
-		} else {
-			rez = (List<Resolution>)resolutions.getValue();
-			//System.out.println("WallpaperResolutionSubmodule from cache");
+		if (resolutions==null){
+			Element rez = cache.get(REGION_KEY);
+			if (rez==null||rez.getObjectValue()==null){
+				resolutions = resolutionService.getByPropertyValueOrdered(null, null, null,
+						gallery.web.controller.resolution.Config.ORDER_BY, gallery.web.controller.resolution.Config.ORDER_HOW);
+				cache.put(new Element(REGION_KEY, resolutions));
+				//System.out.println("WallpaperResolutionSubmodule from DB");
+			} else {
+				resolutions = (List<Resolution>)rez.getValue();
+				//System.out.println("WallpaperResolutionSubmodule from cache");
+			}
 		}
-		return rez;
+		return resolutions;
+
 	}
 
 	@Override
-	public String getQueryParam(){return this.query_param;}
+	public String getQueryParam(){return null;}
 
 	@Override
 	public String getFilterName() {return NAME;}

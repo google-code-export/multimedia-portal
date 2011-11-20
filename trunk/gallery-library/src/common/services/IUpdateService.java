@@ -35,7 +35,7 @@ public interface IUpdateService<T, ID extends Serializable> {
 	 * prepare attributes for update
 	 * @return map with attributes
 	 */
-	public Map initUpdate();
+	public Map<String, Object> initUpdate();
 
 	/**
 	 * updates a command

@@ -31,7 +31,6 @@ import javax.servlet.http.*;
 public class RandomImageServ extends HttpServlet {
 //default parameter values
 	public static final String IMAGE_DIR_DEFAULT = "WEB-INF/CodeImages";
-    public static final String CODE_ATTR_DEFAULT  = "antiSpamCode";
 	public static final int DIGITS_COUNT_DEFAULT = 4;//how many digits will be draw in antibotcode
 //names of init parameters where to take values
 	public static final String IMAGE_DIR_NAME = "image_directory";
@@ -99,7 +98,7 @@ public class RandomImageServ extends HttpServlet {
 				result_code += file_name.substring(0, delimiter_index);
 			}
 
-			request.getSession().setAttribute(CODE_ATTR_DEFAULT,result_code);
+			common.web.filters.Antispam.setCode(request ,result_code);
 
 			//transform BufferedImage to byte[] BEGIN
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -127,24 +126,6 @@ public class RandomImageServ extends HttpServlet {
 			if (temp==null) imgDir = IMAGE_DIR_DEFAULT;
 			else imgDir = IMAGE_DIR_DEFAULT;
 		}
-	}
-
-	/**
-	 * get an antispam code from http request
-	 * @param request
-	 * @return
-	 */
-	public static String getCode(HttpServletRequest request){
-		return (String)request.getSession().getAttribute(CODE_ATTR_DEFAULT);
-	}
-
-	/**
-	 * get an antispam code from a given session
-	 * @param session
-	 * @return
-	 */
-	public static String getCode(HttpSession session){
-		return (String)session.getAttribute(CODE_ATTR_DEFAULT);
 	}
 
 } 

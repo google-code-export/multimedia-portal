@@ -18,6 +18,7 @@ package gallery.service.pages;
 
 import common.services.generic.GenericCacheService;
 import gallery.model.beans.Pages;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -47,7 +48,7 @@ public class RubricationService extends GenericCacheService<List<Pages>> impleme
     public List<Pages> getFromDB() {
 		List<Pages> rez = pages_service.getPagesChildrenRecurciveOrderedWhere(RUBRIC_PSEUDONYMES, RUBRIC_WHERE,
 				new Object[][]{new Object[]{Boolean.TRUE},pages_types});
-        return rez;
+		return rez;
     }
 
     public void setPages_types(Object[] value){this.pages_types = value;}
@@ -66,18 +67,83 @@ public class RubricationService extends GenericCacheService<List<Pages>> impleme
 	@Override
 	public List<Pages> getCurrentBranch(Long id_pages) {
 		List<Pages> tmp =  getObject();
-		LinkedList<Pages> rez = new LinkedList<Pages>();
+		List<Pages> rez = getBranchUnsorted(tmp, id_pages);
+		if (rez.isEmpty()){
+			Pages cur_page;
+			boolean selected = true;
+			for (Pages p:tmp){
+				if (p.getLayer()<3){
+					cur_page = (Pages)p.clone();
+					cur_page.setSelected(selected);
+					rez.add(cur_page);
+					selected = false;
+				}
+			}
+		}
+		return rez;
+	}
 
+	/**
+	 * the order is natural
+	 * @param clone pages list
+	 * @param id_pages current page's id
+	 * @return list of pages in an appropriate order, with selected flag
+	 */
+	protected List<Pages> getBranchUnsorted(List<Pages> object, Long id_pages){
+		LinkedList<Pages> rez = new LinkedList<Pages>();
+		int i=object.size();
+		Long cur_id = id_pages;
+		//1-st collecting all parents
+		HashSet<Long> parents_id = new HashSet<Long>();
+		parents_id.add(id_pages);
+		while (i>0){
+			i--;
+			if (cur_id.equals(object.get(i).getId())){
+				cur_id = object.get(i).getId_pages();
+				if (cur_id == null){
+					break;
+				} else {
+					parents_id.add(cur_id);
+				}
+			}
+		}
+		//2-nd adding required
+		i=object.size();
+		Pages cur_page;
+		while (i>0){
+			i--;
+			cur_page = object.get(i);
+			if (parents_id.contains(cur_page.getId())){
+				cur_page = (Pages)cur_page.clone();
+				rez.addFirst(cur_page);
+				cur_page.setSelected(Boolean.TRUE);
+			} else if (parents_id.contains(cur_page.getId_pages())) {
+				rez.addFirst((Pages)cur_page.clone());
+			} else if (cur_page.getId_pages()==null){
+				rez.addLast((Pages)cur_page.clone());
+			}
+		}
+		return rez;
+	}
+
+	/**
+	 * sortes sets selected pages to the top of list
+	 * @param clone pages list
+	 * @param id_pages current page's id
+	 * @return list of pages in an appropriate order, with selected flag
+	 */
+	protected List<Pages> getBranchSortedTop(List<Pages> object, Long id_pages){
+		LinkedList<Pages> rez = new LinkedList<Pages>();
 		//marking current navigation branch
 		Long cur_id = id_pages;
 		Pages cur_page;
-		int i=tmp.size();
+		int i=object.size();
 		int last = -1;
 		int pos = 0;
 		//marking selected branch
 		while (i>0){
 			i--;
-			cur_page = tmp.get(i);
+			cur_page = object.get(i);
 			if (cur_id.equals(cur_page.getId_pages())&&last!=i){
 				rez.add(pos, (Pages)cur_page.clone());
 			} else
@@ -89,22 +155,11 @@ public class RubricationService extends GenericCacheService<List<Pages>> impleme
 					cur_id = cur_page.getId_pages();
 					last = i;
 					pos = rez.size();
-					i=tmp.size();
+					i=object.size();
 					if (cur_id==null){
 						break;
 					}
 				}
-		}
-		if (rez.isEmpty()){
-			boolean selected = true;
-			for (Pages p:tmp){
-				if (p.getLayer()<3){
-					cur_page = (Pages)p.clone();
-					cur_page.setSelected(selected);
-					rez.add(cur_page);
-					selected = false;
-				}
-			}
 		}
 		return rez;
 	}

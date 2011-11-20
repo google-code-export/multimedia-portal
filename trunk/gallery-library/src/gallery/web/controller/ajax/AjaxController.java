@@ -37,7 +37,8 @@ public class AjaxController implements Controller{ //extends AbstractController 
 
 	protected String template;
 
-	public static final String TYPE = gallery.web.controller.pages.types.WallpaperGalleryType.TYPE;
+	public static final String[] TYPES =
+			new String[]{gallery.web.controller.pages.types.WallpaperGalleryType.TYPE, com.multimedia.core.pages.types.CommonItemType.TYPE};
 
 	public void init(){
 		StringBuilder sb = new StringBuilder();
@@ -56,17 +57,12 @@ public class AjaxController implements Controller{ //extends AbstractController 
 			throws Exception
 	{
 		Long id_pages = RequestUtils.getLongParam(request, "id_pages");
-		List<Pages> rez = pagesService.getShortByPropertiesValueOrdered(RUBRIC_PSEUDONYMES,
-				RUBRIC_WHERE, new Object[]{Boolean.TRUE, TYPE, id_pages});
+		List<Pages> rez =  pagesService.getShortByPropertiesValuesOrdered(RUBRIC_PSEUDONYMES, RUBRIC_WHERE,
+				new Object[][]{new Object[]{Boolean.TRUE}, TYPES, new Object[]{id_pages}});
         return new ModelAndView(template, "pages", rez);
 	}
 
 	public void setPagesService(IPagesService service) {this.pagesService = service;}
 	public void setTemplate(String value){template = value;}
-
-	//TODO:redo
-	/*long last_mod = System.currentTimeMillis();
-	@Override
-	public long getLastModified(HttpServletRequest arg0) {return last_mod;}*/
 
 }

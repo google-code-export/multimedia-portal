@@ -16,9 +16,9 @@
 
 package gallery.service.pages;
 
+import com.multimedia.service.wallpaper.ICmsWallpaperService;
+import com.multimedia.service.wallpaper.IWallpaperService;
 import gallery.model.beans.Pages;
-import gallery.service.photo.IPhotoService;
-import gallery.service.photo.IPhotoServiceCms;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -29,14 +29,14 @@ import java.util.Vector;
  */
 public class PagesServiceCmsImpl implements IPagesServiceCms{
 	protected IPagesService pages_service;
-	protected IPhotoService photo_service;
-    protected IPhotoServiceCms photo_service_cms;
+	protected IWallpaperService wallpaper_service;
+    protected ICmsWallpaperService wallpaper_service_cms;
 
 	public void init(){
 		StringBuilder sb = new StringBuilder();
 		common.utils.MiscUtils.checkNotNull(pages_service, "pages_service", sb);
-		common.utils.MiscUtils.checkNotNull(photo_service, "photo_service", sb);
-		common.utils.MiscUtils.checkNotNull(photo_service_cms, "photo_service_cms", sb);
+		common.utils.MiscUtils.checkNotNull(wallpaper_service, "wallpaper_service", sb);
+		common.utils.MiscUtils.checkNotNull(wallpaper_service_cms, "wallpaper_service_cms", sb);
 		if (sb.length()>0){
 			throw new NullPointerException(sb.toString());
 		}
@@ -66,7 +66,7 @@ public class PagesServiceCmsImpl implements IPagesServiceCms{
             i--;
             cur_page = rubrication.get(i);
             if (cur_page.getLast()){
-                count = photo_service.getRowCount("id_pages", cur_page.getId());
+                count = wallpaper_service.getRowCount("id_pages", cur_page.getId());
                 if (count<1){
                     if (cur_page.getActive())
                         empty_pages.add(cur_page.getId());
@@ -111,8 +111,8 @@ public class PagesServiceCmsImpl implements IPagesServiceCms{
 			if (p.getLast()){
 				//because its only one page type now, we do not check it
 				//get pictures quantity
-				p.setPhotoCount(photo_service.getRowCount("id_pages", p.getId()).intValue());
-				p.setOptimized((Boolean)photo_service.getSinglePropertyU("optimized", FULL_WALLPAPER, new Object[]{Boolean.FALSE,p.getId()}, 0));
+				p.setWallpaperCount(wallpaper_service.getRowCount("id_pages", p.getId()).intValue());
+				p.setOptimized((Boolean)wallpaper_service.getSinglePropertyU("optimized", FULL_WALLPAPER, new Object[]{Boolean.FALSE,p.getId()}, 0));
 			}
 		}
         return pages;
@@ -124,7 +124,7 @@ public class PagesServiceCmsImpl implements IPagesServiceCms{
     public void optimizeCategory(Long id){
         //1-st checking if current category has any optimization
         //Integer count = (Integer)pages_service.getSinglePropertyU("pseudonyms.size","id",id);
-		List<Pages> children = pages_service.getShortByPropertyValueOrdered(OPTIMIZE_NAMES, OPTIMIZE_PSEUD, "id", id, null, null);
+		List<Pages> children = pages_service.getByPropertyValueOrdered(OPTIMIZE_NAMES, OPTIMIZE_PSEUD, "id", id, null, null);
         if (children.size()<1||children.get(0).getPseudonymsCount()<1)
             return;
         LinkedList<Long> ids_tmp = new LinkedList<Long>();
@@ -137,14 +137,14 @@ public class PagesServiceCmsImpl implements IPagesServiceCms{
                 if (p.getLast()){
                     ids_tmp.add(p.getId());
                 } else {
-                    children.addAll(pages_service.getShortByPropertyValueOrdered(OPTIMIZE_NAMES, OPTIMIZE_PSEUD, "id_pages", p.getId(), null, null));
+                    children.addAll(pages_service.getByPropertyValueOrdered(OPTIMIZE_NAMES, OPTIMIZE_PSEUD, "id_pages", p.getId(), null, null));
                 }
             }
             k++;
         }
         Long[] ids = new Long[0];
         ids = ids_tmp.toArray(ids);
-        photo_service_cms.optimizePhotoCategories(ids);
+        wallpaper_service_cms.optimizeWallpaperCategories(ids);
     }
 
     @Override
@@ -161,11 +161,11 @@ public class PagesServiceCmsImpl implements IPagesServiceCms{
             }
         }
         ids = java.util.Arrays.copyOf(ids, k);
-        photo_service_cms.setPhotoOptimizationCategories(ids, optimized);
+        wallpaper_service_cms.setWallpaperOptimizationCategories(ids, optimized);
     }
 
-	public void setPhoto_service(IPhotoService value){this.photo_service = value;}
-	public void setPhoto_service_cms(IPhotoServiceCms value){this.photo_service_cms = value;}
+	public void setWallpaper_service(IWallpaperService value){this.wallpaper_service = value;}
+	public void setWallpaper_service_cms(ICmsWallpaperService value){this.wallpaper_service_cms = value;}
 	public void setPages_service(IPagesService pages_service){this.pages_service = pages_service;}
 
 }

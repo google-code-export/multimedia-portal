@@ -42,13 +42,14 @@ public class SingletonInstanceServiceImpl<T, ID extends Serializable> implements
 
 	@Override
 	public T getInstance() {
-		List<T> rez = dao.getByPropertiesValuePortionOrdered(null, null, null, null, 0, 1, null, null);
-		//TODO: remake, add limit statement
+		List<T> rez = dao.getPortion(0, 1);
+
 		if (rez.size()>0)
 			return rez.get(0);
 		else
 			return null;
 	}
+
 	@Override
 	public void saveInstance(T entity) {dao.makePersistent(entity);}
 

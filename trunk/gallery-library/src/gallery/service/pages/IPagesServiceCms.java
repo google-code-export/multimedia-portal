@@ -26,10 +26,11 @@ import java.util.List;
 public interface IPagesServiceCms {
     public void reactivate(Long id_pages);
     /**
-     * pages contain quantities of items (PagesPseudonimes, photos...)
+     * pages contain quantities of items (PagesPseudonimes, wallpapers...)
      * @return all pages, that are modules (i.e. wallpaper_gallery_type)
      */
 	public List<Pages> getCategoriesFull();
+
     /**
      * creates an optimization phrases for all child pageses's elements
      * @param id
