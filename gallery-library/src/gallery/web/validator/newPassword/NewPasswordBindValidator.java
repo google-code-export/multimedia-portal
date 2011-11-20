@@ -29,7 +29,7 @@ import security.beans.User;
  * @author demchuck.dima@gmail.com
  */
 public class NewPasswordBindValidator extends CommonBindValidator{
-	protected IUserService user_service;
+	protected IUserService<User, Long> user_service;
 
 	public void init(){
 		StringBuilder sb = new StringBuilder();
@@ -45,7 +45,7 @@ public class NewPasswordBindValidator extends CommonBindValidator{
 		super.validate(command, err, request);
 		if (!err.hasErrors()){
 			NewPassword new_password = (NewPassword)command;
-			List<User> users = user_service.getShortByPropertyValueOrdered(null, "email", new_password.getEmail(), null, null);
+			List<User> users = user_service.getByPropertyValueOrdered(null, "email", new_password.getEmail(), null, null);
 			if (users.isEmpty()){
 				err.rejectValue("email", "not_exists.email");
 			}else{
@@ -54,6 +54,6 @@ public class NewPasswordBindValidator extends CommonBindValidator{
 		}
 	}
 
-	public void setUser_service(IUserService value){this.user_service = value;}
+	public void setUser_service(IUserService<User, Long> value){this.user_service = value;}
 
 }

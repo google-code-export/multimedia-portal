@@ -20,10 +20,11 @@ import common.beans.KeepParameters;
 import common.beans.PagerBean;
 import common.bind.ABindValidator;
 import gallery.model.beans.Pages;
-import gallery.model.beans.Photo;
+import gallery.model.beans.Wallpaper;
+import gallery.model.command.TagCloudData;
 import gallery.model.command.TagCloudView;
 import gallery.service.pagesPseudonym.IPagesPseudonymService;
-import gallery.web.support.PaginatedListUtils;
+import com.multimedia.web.support.PaginatedListUtils;
 import gallery.web.support.pages.Utils;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +49,7 @@ public class WallpaperTagCloudType extends AWallpaperType{
 	public static final String OPTIMIZATION_STRING = "wallpaper_opt_phraze";
 
 	protected String contentUrl;
+	protected String searchUrl;
 	protected String optimizationUrl;
 	protected String infoTopUrl;
 	protected String infoBottomUrl;
@@ -63,6 +65,7 @@ public class WallpaperTagCloudType extends AWallpaperType{
 		super.init();
 		StringBuilder sb = new StringBuilder();
 		common.utils.MiscUtils.checkNotNull(contentUrl, "contentUrl", sb);
+		common.utils.MiscUtils.checkNotNull(searchUrl, "searchUrl", sb);
 		common.utils.MiscUtils.checkNotNull(optimizationUrl, "optimizationUrl", sb);
 		common.utils.MiscUtils.checkNotNull(infoTopUrl, "infoTopUrl", sb);
 		common.utils.MiscUtils.checkNotNull(infoBottomUrl, "infoBottomUrl", sb);
@@ -81,36 +84,38 @@ public class WallpaperTagCloudType extends AWallpaperType{
 		TagCloudView tagCloud = new TagCloudView();
 		BindingResult res = bindValidator.bindAndValidate(tagCloud, request);
 		int cur_page_num;
-		if (res.hasErrors()){
+		if (res.hasErrors()||tagCloud.isEmpty()){
 			cur_page_num = 0;
-			common.CommonAttributes.addErrorMessage("form_errors", request);
+			//common.CommonAttributes.addErrorMessage("form_errors", request);
+
+			request.setAttribute(config.getContentDataAttribute(), new TagCloudData(wallpaperService));
+			url.setContent(searchUrl);
 		}else{
 			final String[] props = new String[]{"active", "tags"};
 			final String[][] relations = new String[][]{new String[]{"="}, new String[]{"like", "like", "like", "like"}};
 			final Object[][] values = new Object[][]{new Object[]{Boolean.TRUE}, tagCloud.getTagsLike()};
 			int totalCount =((Long)
-					photoService.getSinglePropertyU("count(*)", props, relations, values, 0, null, null)).intValue();
+					wallpaperService.getSinglePropertyU("count(*)", props, relations, values, 0, null, null)).intValue();
 			cur_page_num = PaginatedListUtils.getPageNumber(request);
 			PagerBean count = paginationUtils.getPagerBean2(cur_page_num, totalCount,
 					keepParameters.getKeepParameters(request));
 
-			int first_item = count.getCurrentPage()*paginationUtils.getPageSize();
-			List<Photo> photos = photoService.getByPropertiesValuePortionOrdered(null, null,
-					props, relations, values, first_item, paginationUtils.getPageSize(), null, null);
+			int first_item = count.getCurrentPage()*paginationUtils.getItemsPerPage();
+			List<Wallpaper> wallpapers = wallpaperService.getByPropertiesValuesPortionOrdered(null, null,
+					props, relations, values, first_item, paginationUtils.getItemsPerPage(), null, null);
 
-			tagCloud.setData(photos);
+			tagCloud.setData(wallpapers);
 			tagCloud.setPager(count);
 
 			request.setAttribute(config.getContentDataAttribute(), tagCloud);
+
+			request.setAttribute(OPTIMIZATION_STRING,
+				getOptimizationPhraze(cur_page_num, Utils.getNavigation(request, super.config)));
+			url.setContent(contentUrl);
+			url.setPage_top(infoTopUrl);
+			url.setPage_bottom(infoBottomUrl);
+			url.setOptimization(optimizationUrl);
 		}
-
-		request.setAttribute(OPTIMIZATION_STRING,
-			getOptimizationPhraze(cur_page_num, Utils.getNavigation(request, super.config)));
-
-		url.setContent(contentUrl);
-		url.setOptimization(optimizationUrl);
-		url.setPage_top(infoTopUrl);
-		url.setPage_bottom(infoBottomUrl);
 	}
 
     public static final String[] OPTIMIZATION_WHERE = new String[]{"id_pages", "useInPages"};
@@ -132,6 +137,7 @@ public class WallpaperTagCloudType extends AWallpaperType{
 	public void setBindValidator(ABindValidator bindValidator) {this.bindValidator = bindValidator;}
 
 	public void setContentUrl(String contentUrl) {this.contentUrl = contentUrl;}
+	public void setSearchUrl(String value) {this.searchUrl = value;}
 	public void setOptimizationUrl(String optimizationUrl) {this.optimizationUrl = optimizationUrl;}
 	public void setInfoTopUrl(String infoTopUrl) {this.infoTopUrl = infoTopUrl;}
 	public void setInfoBottomUrl(String infoBottomUrl) {this.infoBottomUrl = infoBottomUrl;}

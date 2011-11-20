@@ -16,18 +16,19 @@
 
 package com.netstorm.localization;
 
+import com.multimedia.service.locale.ILocaleService;
 import gallery.model.active.LocalesServiceBean;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
-import org.springframework.web.servlet.i18n.AbstractLocaleResolver;
+import org.springframework.web.servlet.LocaleResolver;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public class MyLocaleResolver extends AbstractLocaleResolver{
+public class MyLocaleResolver implements LocaleResolver{
 	protected Logger logger = Logger.getLogger(getClass());
 
 	private ILocaleService locale_service;
@@ -78,6 +79,8 @@ public class MyLocaleResolver extends AbstractLocaleResolver{
 		sub_path = uri.substring(contextPath.length());
 		return new LocalesServiceBean(locale_service, getDefaultLocale(), locale, sub_path, !sub_path.startsWith(all_locales_prefix));
 	}
+
+	public Locale getDefaultLocale(){return locale_service.getDefaultLocale();}
 
 	public void setLocale_service(ILocaleService value) {this.locale_service = value;}
 	public void setAll_locales_prefix(String value) {this.all_locales_prefix = value;}

@@ -17,7 +17,7 @@
 package gallery.model.command;
 
 import common.beans.PagerBean;
-import gallery.model.beans.Photo;
+import gallery.model.beans.Wallpaper;
 import java.util.List;
 
 /**
@@ -30,7 +30,7 @@ public class TagCloudView {
 	/*exect must be binded from the request parameters */
 	protected Boolean exect;
 
-	protected List<Photo> data;
+	protected List<Wallpaper> data;
 	protected PagerBean pager;
 
 	public String getTag() {return tag;}
@@ -44,17 +44,19 @@ public class TagCloudView {
 	 * @return string to be used in Like statement
 	 */
 	public String[] getTagsLike(){
-		if (exect==null||!exect){
+		if ((exect==null||!exect)&&(tag!=null&&!tag.equals(""))){
 			return new String[]{tag+",%", "%, "+tag, "%, "+tag+",%", tag};
 		}else{
 			return new String[]{"%"+tag+"%"};
 		}
 	}
 
-	public List<Photo> getData() {return data;}
-	public void setData(List<Photo> data) {this.data = data;}
+	public List<Wallpaper> getData() {return data;}
+	public void setData(List<Wallpaper> data) {this.data = data;}
 
 	public PagerBean getPager() {return pager;}
 	public void setPager(PagerBean pager) {this.pager = pager;}
+
+	public boolean isEmpty(){return (tag==null||tag.equals(""))&&(exect==null||!exect);}
 	
 }

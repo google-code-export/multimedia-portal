@@ -119,5 +119,5 @@ public interface IPagesService extends IGenericService<Pages, Long>{
     public List<Pages> getPagesChildrenRecurciveOrderedWhere(String[] properties, String[] propPseudonyms, String[] propertyNames, Object[][] propertyValues);
     public List<Pages> getPagesChildrenRecurciveOrderedWhere(String[] properties, String[] propPseudonyms, String[] propertyNames, Object[][] propertyValues, Long first_id);
 
-	public List<Pages> getShortByPropertiesValueOrdered(String[] propNames, String[] propertyName, Object[] propertyValue);
+	public List<Pages> getShortByPropertiesValuesOrdered(String[] propNames, String[] propertyName, Object[][] propertyValue);
 }

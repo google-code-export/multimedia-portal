@@ -50,4 +50,15 @@ public class UserServiceImpl extends GenericServiceImpl<User, Long> implements I
 			return null;
 		}
 	}
+
+	protected static final String[] SECURITY_UPDATE = new String[]{"last_accessed"};
+	@Override
+	public void userEntered(User user) {
+		if (user!=null){
+			dao.updatePropertiesById(SECURITY_UPDATE, new Object[]{new java.util.Date()}, user.getId());
+		}
+	}
+
+	@Override
+	public User getUser(Long id) {return getById(id);}
 }

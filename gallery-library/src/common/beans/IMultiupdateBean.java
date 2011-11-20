@@ -17,12 +17,13 @@
 package common.beans;
 
 import common.services.IMultiupdateService;
+import java.io.Serializable;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public interface IMultiupdateBean {
+public interface IMultiupdateBean<T, ID extends Serializable> {
 	/**
 	 * saves to database using an appropriate method :)
 	 * actually you must just specify fields for update
@@ -30,7 +31,7 @@ public interface IMultiupdateBean {
 	 * @param service used for saving
 	 * @return rows updated
 	 */
-	public int save(IMultiupdateService service);
+	public int save(IMultiupdateService<T, ID> service);
 
 	//TODO ... rework this 
 	/**
@@ -38,4 +39,10 @@ public interface IMultiupdateBean {
 	 * @return false if another model should be created
 	 */
 	public boolean isModel();
+
+	/**
+	 * get model represented by this bean
+	 * @return model object or null if isModel is false
+	 */
+	public Object getModel();
 }

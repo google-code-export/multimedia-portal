@@ -16,6 +16,7 @@
 
 package gallery.web.controller.pages.types;
 
+import com.multimedia.core.pages.types.IPagesType;
 import common.email.IMailService;
 import common.utils.RequestUtils;
 import gallery.service.user.IUserService;
@@ -41,7 +42,7 @@ public class UserType implements IPagesType{
 	@Override
 	public String getTypeRu() {return TYPE_RU;}
 
-	protected IUserService userService;
+	protected IUserService<User, Long> userService;
 	protected IMailService mailService;
 	private UserViewValidator validatorInsert;
 	private UserViewValidator validatorUpdate;
@@ -150,7 +151,7 @@ public class UserType implements IPagesType{
 		return url;
 	}
 
-	public void setUserService(IUserService service) {this.userService = service;}
+	public void setUserService(IUserService<User, Long> service) {this.userService = service;}
     public void setInsertValidator(UserViewValidator val){this.validatorInsert = val;}
     public void setUpdateValidator(UserViewValidator val){this.validatorUpdate = val;}
 	public void setMailService(IMailService value){this.mailService = value;}

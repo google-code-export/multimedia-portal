@@ -31,11 +31,8 @@ public class TypesChecker {
     private TypesChecker() {
         //here you need to put all types that you need to correct
         types.put("email",new EmailChecker());
-        types.put("integer",new IntegerChecker());
         types.put("phone",new PhoneChecker());
-        types.put("login",new LoginChecker());
         types.put("password",new PasswordChecker());
-        types.put("float",new FloatChecker());
         types.put("text",new TextChecker());
         types.put("html",new HtmlChecker());
         types.put("url",new UrlChecker());

@@ -23,6 +23,7 @@ import gallery.model.beans.PagesPseudonym;
 import gallery.model.command.FilterPagesPseudonymCms;
 import gallery.model.command.MultiPagesPseudonymCms;
 import gallery.service.pages.IPagesService;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,13 +56,13 @@ public class PagesPseudonymServiceCmsImpl implements  ICmsService<PagesPseudonym
 	}
 
 	@Override
-	public IMultiupdateBean getMultiupdateBean(int size) {return new MultiPagesPseudonymCms(size);}
+	public IMultiupdateBean<PagesPseudonym, Long> getMultiupdateBean(int size) {return new MultiPagesPseudonymCms(size);}
 
 	@Override
 	public PagesPseudonym getInsertBean() {
 		PagesPseudonym item = new PagesPseudonym();
 		Long sort = (Long) service.getSinglePropertyU("max(sort)");
-		if (sort == null) sort = new Long(0);
+		if (sort == null) sort = Long.valueOf(0);
 		else sort++;
 		item.setSort(sort);
         item.setUseInItems(Boolean.TRUE);
@@ -76,8 +77,8 @@ public class PagesPseudonymServiceCmsImpl implements  ICmsService<PagesPseudonym
 	}
 
 	@Override
-	public Map initInsert() {
-		HashMap m = new HashMap();
+	public Map<String, Object> initInsert() {
+		HashMap<String, Object> m = new HashMap<String, Object>();
 		m.put("categories", pages_service.getAllCombobox(null, null, null));
 		return m;
 	}
@@ -93,7 +94,7 @@ public class PagesPseudonymServiceCmsImpl implements  ICmsService<PagesPseudonym
 	}
 
 	@Override
-	public Map initUpdate() {
+	public Map<String, Object> initUpdate() {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
@@ -103,10 +104,10 @@ public class PagesPseudonymServiceCmsImpl implements  ICmsService<PagesPseudonym
 	}
 
 	@Override
-	public Map initFilter() {return null;}
+	public Map<String, Object> initFilter() {return null;}
 
 	@Override
-	public IFilterBean getFilterBean() {return new FilterPagesPseudonymCms();}
+	public IFilterBean<PagesPseudonym> getFilterBean() {return new FilterPagesPseudonymCms();}
 
 	@Override
 	public List<PagesPseudonym> getFilteredByPropertyValue(String propertyName, Object propertyValue) {
@@ -120,5 +121,10 @@ public class PagesPseudonymServiceCmsImpl implements  ICmsService<PagesPseudonym
 
 	public void setService(IPagesPseudonymService service) {this.service = service;}
 	public void setPages_service(IPagesService pages_service){this.pages_service = pages_service;}
+
+	@Override
+	public int saveOrUpdateCollection(Collection c) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
 
 }

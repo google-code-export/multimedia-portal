@@ -16,14 +16,14 @@
 
 package gallery.service.autoreplace;
 
+import common.services.generic.IGenericLocalizedService;
 import gallery.model.beans.AutoreplaceL;
-import common.services.generic.IGenericService;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public interface IAutoreplaceService extends IGenericService<AutoreplaceL, Long>{
+public interface IAutoreplaceService extends IGenericLocalizedService<AutoreplaceL, Long>{
 	public IReplacement getAllReplacements(String lang);
 
 	interface IReplacement{

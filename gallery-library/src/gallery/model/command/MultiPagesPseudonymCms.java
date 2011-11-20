@@ -18,12 +18,13 @@ package gallery.model.command;
 
 import common.beans.IMultiupdateBean;
 import common.services.IMultiupdateService;
+import gallery.model.beans.PagesPseudonym;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public class MultiPagesPseudonymCms implements IMultiupdateBean{
+public class MultiPagesPseudonymCms implements IMultiupdateBean<PagesPseudonym, Long>{
     private Long[] id;
     private Long[] sort;
     private String[] text;
@@ -57,7 +58,7 @@ public class MultiPagesPseudonymCms implements IMultiupdateBean{
 
 	public static final String[] MULTI_UPDATE_NAMES = new String[]{"text", "sort","useInPages","useInItems"};
 	@Override
-	public int save(IMultiupdateService service) {
+	public int save(IMultiupdateService<PagesPseudonym, Long> service) {
 		if (id!=null&&text!=null&&sort!=null&&use_in_items!=null&&use_in_pages!=null){
 			return service.updateObjectArrayShortById(MULTI_UPDATE_NAMES, id, text, sort, use_in_pages, use_in_items);
 		}else{
@@ -75,4 +76,7 @@ public class MultiPagesPseudonymCms implements IMultiupdateBean{
 
 	@Override
 	public boolean isModel() {return false;}
+
+	@Override
+	public Object getModel() {return null;}
 }

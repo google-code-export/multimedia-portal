@@ -16,6 +16,7 @@
 
 package gallery.service.rss;
 
+import com.multimedia.service.wallpaper.IWallpaperService;
 import core.rss.RSSFeedGeneratorImpl;
 import core.rss.elem.Channel;
 import core.rss.elem.Item;
@@ -23,13 +24,13 @@ import core.rss.elem.RSS;
 import gallery.model.beans.Pages;
 import gallery.service.autoreplace.IAutoreplaceService;
 import gallery.service.pages.IPagesService;
-import gallery.service.photo.IPhotoService;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.hibernate.ScrollableResults;
 import org.springframework.core.io.Resource;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
@@ -39,7 +40,7 @@ public class RssServiceImpl implements IRssService{
 	Logger logger = Logger.getLogger(RssServiceImpl.class.getName());
 
     private IPagesService pages_service;
-    private IPhotoService photo_service;
+    private IWallpaperService wallpaper_service;
 	private IAutoreplaceService autoreplace_service;
 	private String path;
 	private boolean generating = false;
@@ -47,7 +48,7 @@ public class RssServiceImpl implements IRssService{
 	public void init(){
 		StringBuilder sb = new StringBuilder();
 		common.utils.MiscUtils.checkNotNull(pages_service, "pages_service", sb);
-		common.utils.MiscUtils.checkNotNull(photo_service, "photo_service", sb);
+		common.utils.MiscUtils.checkNotNull(wallpaper_service, "wallpaper_service", sb);
 		common.utils.MiscUtils.checkNotNull(autoreplace_service, "autoreplace_service", sb);
 		common.utils.MiscUtils.checkNotNull(path, "path", sb);
 		if (sb.length()>0){
@@ -70,13 +71,14 @@ public class RssServiceImpl implements IRssService{
 	}
 
 	public void setPages_service(IPagesService value){this.pages_service = value;}
-	public void setPhoto_service(IPhotoService value){this.photo_service = value;}
+	public void setWallpaper_service(IWallpaperService value){this.wallpaper_service = value;}
 	public void setAutoreplace_service(IAutoreplaceService service) {this.autoreplace_service = service;}
 
 	protected static final String[] MAIN_PROPS = new String[]{"title", "description"};
 	protected static final String[] MAIN_PSEUDONYMES = new String[]{"id_pages","active","type"};
 	protected static final Object[] MAIN_VALUES = new Object[]{null,Boolean.TRUE,"general_wallpaper_gallery"};
 	@Override
+	@Transactional(readOnly=true)
 	public void create() {
 		if (generating){
 			logger.info("xml is allready generating ...");
@@ -87,11 +89,11 @@ public class RssServiceImpl implements IRssService{
 			logger.info("start generate xml");
 			long time = System.currentTimeMillis();
 
-			File img_dir = new File(photo_service.getStorePath(), Config.ENCLOSURE_IMG_SUBDIR);
+			File img_dir = new File(wallpaper_service.getStorePath(), Config.ENCLOSURE_IMG_SUBDIR);
 
 			//get main wallpaper page
 			Channel chan;
-			List<Pages> temp = pages_service.getShortByPropertiesValueOrdered(null, MAIN_PSEUDONYMES, MAIN_VALUES, null, null);
+			List<Pages> temp = pages_service.getByPropertiesValueOrdered(null, MAIN_PSEUDONYMES, MAIN_VALUES, null, null);
 			if (temp.isEmpty()){
 				chan = new Channel(gallery.web.Config.SITE_NAME, gallery.web.Config.SITE_NAME, gallery.web.Config.SITE_NAME);
 			} else{
@@ -108,18 +110,22 @@ public class RssServiceImpl implements IRssService{
 			chan.setLastBuildDate(new java.util.Date());
 			rss.addChannel(chan);
 
-			ScrollableResults sr = photo_service.getScrollableResults("id, id_pages, description, title, date_upload, name", "active", Boolean.TRUE, new String[]{"date_upload"}, new String[]{"DESC"});
+			ScrollableResults sr = wallpaper_service.getScrollableResults("id, id_pages, description, title, date_upload, name", "active", Boolean.TRUE, new String[]{"date_upload"}, new String[]{"DESC"});
 			int max_elements = 100;
 			sr.beforeFirst();
 			while (sr.next()&&(max_elements-->0)){
-				Item item = new Item(sr.getString(2),gallery.web.Config.SITE_NAME+"index.htm?id_pages_nav="+sr.getLong(1)+"&id_photo_nav="+sr.getLong(0), sr.getString(3));
-				item.setPubDate(sr.getDate(4));
-				long fileLen = (new File(img_dir, sr.getString(5))).length();
-				if (fileLen>0){
-					item.setEnclosure(new Item.Enclosure(gallery.web.Config.SITE_NAME+Config.ENCLOSURE_IMG_WEBDIR+sr.getString(5), fileLen, "image/jpeg"));
+				try{
+					Item item = new Item(sr.getString(2),gallery.web.Config.SITE_NAME+"index.htm?id_pages_nav="+sr.getLong(1)+"&id_photo_nav="+sr.getLong(0), sr.getString(3));
+					item.setPubDate(sr.getDate(4));
+					long fileLen = (new File(img_dir, sr.getString(5))).length();
+					if (fileLen>0){
+						item.setEnclosure(new Item.Enclosure(gallery.web.Config.SITE_NAME+Config.ENCLOSURE_IMG_WEBDIR+sr.getString(5), fileLen, "image/jpeg"));
+					}
+					//item.addCategory(new Item.Category("test"));
+					chan.addItem(item);
+				} finally {
+					//TODO: mb add some logging here
 				}
-				//item.addCategory(new Item.Category("test"));
-				chan.addItem(item);
 			}
 			sr.close();
 			try {
@@ -143,9 +149,9 @@ public class RssServiceImpl implements IRssService{
 		//subdirectory of store path where to get images
 		public static final String ENCLOSURE_IMG_SUBDIR = "medium";
 		//subdirectory of store path where to get images
-		public static final String ENCLOSURE_IMG_WEBDIR = "images/photo/medium/";
+		public static final String ENCLOSURE_IMG_WEBDIR = "images/wallpaper/medium/";
 		//web path to logo
-		public static final String LOGO_WEBDIR = "images/top/logo.jpg";
+		public static final String LOGO_WEBDIR = "img/top/logo.jpg";
 		//web path to logo
 		public static final String RSS_FILE_NAME = "rss.xml";
 		private Config(){};

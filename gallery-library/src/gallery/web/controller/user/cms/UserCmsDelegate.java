@@ -23,6 +23,7 @@ import gallery.service.pages.IPagesService;
 import gallery.service.user.IUserService;
 import gallery.web.controller.user.Config;
 import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
@@ -39,7 +40,7 @@ public class UserCmsDelegate{
 
 	//fields ....
 	protected IPagesService pagesService;
-	protected IUserService userService;
+	protected IUserService<User, Long> userService;
 	private Config config;
 	private UserCmsValidator validatorInsert;
 	private UserCmsValidator validatorUpdate;
@@ -73,7 +74,7 @@ public class UserCmsDelegate{
 
 	public ModelAndView doView(HttpServletRequest req, HttpServletResponse resp){
 		//logger.fine("do=view");
-		HashMap m = getCommonModel(req);
+		Map<String, Object> m = getCommonModel(req);
 		m.put(config.getContentUrlAttribute(),show_url);
 
 		Long id_pages = common.utils.RequestUtils.getLongParam(req, config.getId_pagesParamName());
@@ -83,7 +84,7 @@ public class UserCmsDelegate{
     }
 
 	public ModelAndView doInsert(HttpServletRequest req, HttpServletResponse resp){
-		HashMap m = getCommonModel(req);
+		Map<String, Object> m = getCommonModel(req);
 		m.put(config.getContentUrlAttribute(),insert_url);
 		m.put("editForm_topHeader", "Добавление");
 		m.put("avaibleRoles", config.getAvaibleRoles());
@@ -113,7 +114,7 @@ public class UserCmsDelegate{
     }
 	
 	public ModelAndView doUpdate(HttpServletRequest req, HttpServletResponse resp){
-		HashMap m = getCommonModel(req);
+		Map<String, Object> m = getCommonModel(req);
 		m.put(config.getContentUrlAttribute(),update_url);
 		m.put("editForm_topHeader", "Редактирование");
 		m.put("avaibleRoles", config.getAvaibleRoles());
@@ -159,7 +160,7 @@ public class UserCmsDelegate{
 		String action = req.getParameter("action");
 		if (action != null && action.equals("delete")) {
 			try{
-				Long id = new Long(req.getParameter("id"));
+				Long id = Long.valueOf(req.getParameter("id"));
 				if (userService.deleteById(id)>0){
 					common.CommonAttributes.addHelpMessage("operation_succeed", req);
 					//logger.fine("not hasErrors");
@@ -175,8 +176,8 @@ public class UserCmsDelegate{
         return doView(req, resp);
     }
 
-	public HashMap getCommonModel(HttpServletRequest req){
-		HashMap m = new HashMap();
+	public Map<String, Object> getCommonModel(HttpServletRequest req){
+		Map<String, Object> m = new HashMap<String, Object>();
 		m.put("title","Пользователи");
 		m.put("top_header","Пользователи");
 
@@ -187,7 +188,7 @@ public class UserCmsDelegate{
 	}
 
 	public void setPagesService(IPagesService pagesService) {this.pagesService = pagesService;}
-	public void setUserService(IUserService userService) {this.userService = userService;}
+	public void setUserService(IUserService<User, Long> userService) {this.userService = userService;}
 	public void setConfig(Config config) {this.config = config;}
     public void setInsertValidator(UserCmsValidator val){this.validatorInsert = val;}
     public void setUpdateValidator(UserCmsValidator val){this.validatorUpdate = val;}

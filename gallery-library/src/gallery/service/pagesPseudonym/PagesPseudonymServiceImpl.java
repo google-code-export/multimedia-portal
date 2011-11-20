@@ -35,12 +35,12 @@ public class PagesPseudonymServiceImpl extends GenericServiceImpl<PagesPseudonym
 
     @Override
     public List<PagesPseudonym> getShortByPropertyValueOrdered(String property, Object value) {
-        return getShortByPropertyValueOrdered(null, property, value, ORDER_BY, ORDER_HOW);
+        return getByPropertyValueOrdered(null, property, value, ORDER_BY, ORDER_HOW);
     }
 
     @Override
     public List<PagesPseudonym> getShortByPropertiesValueOrdered(String[] property, Object[] value) {
-        return getShortByPropertiesValueOrdered(null, property, value, ORDER_BY, ORDER_HOW);
+        return getByPropertiesValueOrdered(null, property, value, ORDER_BY, ORDER_HOW);
     }
 
 }

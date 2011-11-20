@@ -16,6 +16,7 @@
 
 package gallery.model.misc;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -30,7 +31,7 @@ public class StatusBean {
 	private Date start_date;
 
 	public StatusBean() {
-		start_date = new Date();
+		start_date = new Timestamp(System.currentTimeMillis());
 	}
 
 	public Long getTotal() {return total;}

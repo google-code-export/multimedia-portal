@@ -18,41 +18,57 @@ package gallery.model.command;
 
 import common.beans.IMultiupdateBean;
 import common.services.IMultiupdateService;
+import gallery.model.beans.AutoreplaceL;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.collections.FactoryUtils;
+import org.apache.commons.collections.map.LazyMap;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public class MultiAutoreplaceCms implements IMultiupdateBean{
-    private Long[] id;
-    private String[] code;
+public class MultiAutoreplaceCms implements IMultiupdateBean<AutoreplaceL, Long>{
+    /*private Long[] id;
     private String[] text;
+    private String[] code;
     private Long[] sort;
-    private Boolean[] active;
+    private Boolean[] active;*/
+
+	private Map<Integer, AutoreplaceL> autoreplaces;
 
 	public MultiAutoreplaceCms(int size) {
-		id = new Long[size];
-		code = new String[size];
+		autoreplaces = LazyMap.decorate(new HashMap(), FactoryUtils.instantiateFactory(AutoreplaceL.class));
+		/*autoreplaces = new Vector();
+		for (int i=0;i<size;i++){
+			Autoreplace a = new Autoreplace();
+			a.setActive(Boolean.FALSE);
+			AutoreplaceL al = new AutoreplaceL();
+			al.setParent(a);
+			autoreplaces.add(al);
+		}*/
+		/*id = Long.valueOf[size];
 		text = new String[size];
-		sort = new Long[size];
+		code = new String[size];
+		sort = Long.valueOf[size];
 		active = new Boolean[size];
-		java.util.Arrays.fill(active, Boolean.FALSE);
+		java.util.Arrays.fill(active, Boolean.FALSE);*/
 	}
 
-	public Long[] getId() {return id;}
+	/*public Long[] getId() {return id;}
 	public void setId(Long[] id) {this.id = id;}
-
-	public String[] getCode() {return code;}
-	public void setCode(String[] code) {this.code = code;}
 
 	public String[] getText() {return text;}
 	public void setText(String[] text) {this.text = text;}
+
+	public String[] getCode() {return code;}
+	public void setCode(String[] code) {this.code = code;}
 
 	public Long[] getSort() {return sort;}
 	public void setSort(Long[] sort) {this.sort = sort;}
 
 	public Boolean[] getActive() {return active;}
-	public void setActive(Boolean[] active) {this.active = active;}
+	public void setActive(Boolean[] active) {this.active = active;}*/
 
     /*public String getActiveHtml() {
         if (Boolean.TRUE.equals(active))
@@ -61,68 +77,33 @@ public class MultiAutoreplaceCms implements IMultiupdateBean{
             return "";
     }*/
 
-	public static final String[] MULTI_UPDATE_NAMES = new String[]{"code","text","sort","active"};
+	public Map<Integer, AutoreplaceL> getAutoreplaces() {return autoreplaces;}
+	public void setAutoreplaces(Map<Integer, AutoreplaceL> autoreplaces) {this.autoreplaces = autoreplaces;}
+
+	//public static final String[] MULTI_UPDATE_NAMES = new String[]{"text"/*,"parent.code","parent.sort","parent.active"*/};
 	@Override
-	public int save(IMultiupdateService service) {
-		if (id!=null&&code!=null&&text!=null&&active!=null&&sort!=null){
-			return service.updateObjectArrayShortById(MULTI_UPDATE_NAMES, id, code, text, sort, active);
-		}else{
-			return -1;
-		}
+	public int save(IMultiupdateService<AutoreplaceL, Long> service) {
+		return service.saveOrUpdateCollection(getAutoreplaces().values());
+		//if (id!=null&&text!=null/*&&code!=null&&active!=null&&sort!=null*/){
+		//	return service.updateObjectArrayShortById(MULTI_UPDATE_NAMES, id, text/*, code, sort, active*/);
+		//}else{
+		//	return -1;
+		//}
 	}
 
 	public int getSize(){
-		if (id!=null){
+		return getAutoreplaces().size();
+		/*if (id!=null){
 			return id.length-1;
 		}else{
 			return 0;
-		}
+		}*/
 	}
 
 	@Override
-	public boolean isModel() {return true;}
+	public boolean isModel() {return false;}
 
-	/*@Override
-	public List<Autoreplace> getItems(){
-		List<Autoreplace> rez = new Vector<Autoreplace>();
-		if (id!=null){
-			for (int i=0;i<id.length;i++){
-				Autoreplace a = new Autoreplace();
-				a.setId(id[i]);
-				rez.add(a);
-			}
-			if (sort!=null&&sort.length==id.length){
-				for (int i=0;i<id.length;i++)
-					rez.get(i).setSort(sort[i]);
-			}else{
-				for (int i=0;i<id.length;i++)
-					rez.get(i).setSort(null);
-			}
-			if (active!=null&&active.length==id.length){
-				for (int i=0;i<id.length;i++)
-					rez.get(i).setActive(active[i]);
-			}else{
-				for (int i=0;i<id.length;i++)
-					rez.get(i).setActive(null);
-			}
-			if (text!=null&&text.length==id.length){
-				for (int i=0;i<id.length;i++)
-					rez.get(i).setText(text[i]);
-			}else{
-				for (int i=0;i<id.length;i++)
-					rez.get(i).setText(null);
-			}
-			if (code!=null&&code.length==id.length){
-				for (int i=0;i<id.length;i++)
-					rez.get(i).setCode(code[i]);
-			}else{
-				for (int i=0;i<id.length;i++)
-					rez.get(i).setCode(null);
-			}
-		}else{
-			return null;
-		}
-		return rez;
-	}*/
+	@Override
+	public Object getModel() {return autoreplaces.values();}
 
 }

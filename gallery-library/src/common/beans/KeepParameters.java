@@ -12,7 +12,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  under the License.
  */
 
 package common.beans;
@@ -84,7 +83,7 @@ public class KeepParameters {
         for (int i=0;i<param_names.length;i++){
             param=req.getParameter(param_names[i]);
 			if (param!=null&&!"".equals(param)){
-				rez.append(f_t?"?":"&");
+				rez.append(f_t?"?":"&amp;");
 				rez.append(param_pseudo[i]);
 				rez.append("=");
 				rez.append(param);

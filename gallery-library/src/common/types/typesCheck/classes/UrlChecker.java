@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  * @author demchuck.dima@gmail.com
  */
 public class UrlChecker implements ITypeChecker{
-    //TODO uncomment this to get url only with sub domain (.net,.kiev.ua,.com,...)
+    //uncomment this to get url only with sub domain (.net,.kiev.ua,.com,...)
     /*private final Pattern pattern =
        Pattern.compile("http://[a-zA-Z0-9._-]+([.][a-zA-Z]{2,4})+(:[0-9]{1,4})?((/[a-zA-Z0-9_.-]+)*)?/?([?][a-zA-Z0-9%.=&_-[+][*]]*)?");*/
     private final Pattern pattern =

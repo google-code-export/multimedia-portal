@@ -29,7 +29,7 @@ import java.util.List;
  * @param <T> type of beans to use
  * @author demchuck.dima@gmail.com
  */
-public interface ICmsService<T, ID extends Serializable> extends IMultiupdateService<ID>, IInsertService<T>, IDeleteService<ID>, IUpdateService<T, ID>, IFilterService<T>{
+public interface ICmsService<T, ID extends Serializable> extends IMultiupdateService<T, ID>, IInsertService<T>, IDeleteService<ID>, IUpdateService<T, ID>, IFilterService<T>{
 	/**
 	 * get all rows to show in cms
 	 * @return list of objects

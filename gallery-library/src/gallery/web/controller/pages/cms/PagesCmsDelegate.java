@@ -23,7 +23,9 @@ import gallery.model.beans.Pages;
 import gallery.service.pages.IPagesService;
 import gallery.service.pages.IPagesServiceCms;
 import gallery.web.controller.pages.Config;
-import gallery.web.controller.pages.types.IPagesType;
+import com.multimedia.core.pages.types.IPagesType;
+import com.multimedia.model.beans.PagesFolder;
+import common.utils.FileUtils;
 import java.util.HashMap;
 import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
@@ -84,7 +86,7 @@ public class PagesCmsDelegate {
 	public static final String TYPES_ATTR = "types";
 	public ModelAndView doView(HttpServletRequest req, HttpServletResponse resp){
 		//logger.fine("do=view");
-		HashMap m = getCommonModel(req);
+		HashMap<String, Object> m = getCommonModel(req);
 		m.put(config.getContentUrlAttribute(), showUrl);
 		m.put(TYPES_ATTR, typesRus);
 		Long id_pages = null;
@@ -93,7 +95,7 @@ public class PagesCmsDelegate {
 			if (id_pages_temp==null||id_pages_temp.equals("")){
 				id_pages = null;
 			}else{
-				id_pages = new Long(id_pages_temp);
+				id_pages = Long.valueOf(id_pages_temp);
 			}
 			m.put("pages", service.getShortOrderedByPropertyValueCms("id_pages", id_pages));
 		}catch(NumberFormatException nfe){
@@ -106,7 +108,7 @@ public class PagesCmsDelegate {
     }
 
 	public ModelAndView doInsert(HttpServletRequest req, HttpServletResponse resp/*, Pages command*/){
-		HashMap m = getCommonModel(req);
+		HashMap<String, Object> m = getCommonModel(req);
 		m.put(config.getContentUrlAttribute(), insertUrl);
 		m.put("types", types);
 		m.put("editForm_topHeader", "Добавление");
@@ -123,13 +125,19 @@ public class PagesCmsDelegate {
 				m.put("command", command);
 				common.CommonAttributes.addErrorMessage("form_errors", req);
 			}else{
+				if (command.getPagesFolder()==null||command.getPagesFolder().getName().isEmpty()){
+					PagesFolder pf = new PagesFolder();
+					pf.setPages(command);
+					pf.setName(FileUtils.toTranslit(command.getName()));
+					command.setPagesFolder(pf);
+				}
 				service.save(command);
 				m.put("command", command);
 				common.CommonAttributes.addHelpMessage("operation_succeed", req);
 			}
 		}else{
 			Long sort = (Long)service.getSinglePropertyU("max(sort)","id_pages",command.getId_pages());
-			if (sort==null) sort = new Long(0);
+			if (sort==null) sort = Long.valueOf(0);
 			else sort++;
 			command.setSort(sort);
 			m.put("command", command);
@@ -139,7 +147,7 @@ public class PagesCmsDelegate {
     }
 
 	public ModelAndView doUpdate(HttpServletRequest req, HttpServletResponse resp){
-		HashMap m = getCommonModel(req);
+		HashMap<String, Object> m = getCommonModel(req);
 		m.put(config.getContentUrlAttribute(), updateUrl);
 		m.put("types", types);
 		m.put("editForm_topHeader", "Редактирование");
@@ -149,7 +157,7 @@ public class PagesCmsDelegate {
 		//getting pages with an appropriate id
 		Pages command;
 		try{
-			Long id = new Long(req.getParameter("id"));
+			Long id = Long.valueOf(req.getParameter("id"));
 			command = service.getById(id);
 			if (command==null) command = new Pages();
 		}catch(NumberFormatException nfe){
@@ -212,7 +220,7 @@ public class PagesCmsDelegate {
 		String action = req.getParameter("action");
 		if ("delete".equals(action)) {
 			try{
-				Long id = new Long(req.getParameter("id"));
+				Long id = Long.valueOf(req.getParameter("id"));
 				if (service.deleteById(id)>0){
 					common.CommonAttributes.addHelpMessage("operation_succeed", req);
 					//logger.fine("not hasErrors");
@@ -262,14 +270,14 @@ public class PagesCmsDelegate {
 
 	public ModelAndView doRelocate(HttpServletRequest req, HttpServletResponse resp){
 		//logger.fine("do=relocate");
-		HashMap m = getCommonModel(req);
+		HashMap<String, Object> m = getCommonModel(req);
 		m.put(config.getContentUrlAttribute(), relocateUrl);
 		m.put("editForm_topHeader", "Перемещение");
 
 		String action = req.getParameter("action");
 		Long id = null;
 		try{
-			id = new Long(req.getParameter("id"));
+			id = Long.valueOf(req.getParameter("id"));
 		}catch(Exception nfe){
 			common.CommonAttributes.addErrorMessage("form_errors", req);
 			//logger.log(Level.FINE,"id must not be null",nfe);
@@ -291,7 +299,7 @@ public class PagesCmsDelegate {
     }
 
     public ModelAndView doMegaModule(HttpServletRequest req, HttpServletResponse resp){
-		HashMap m = getCommonModel(req);
+		HashMap<String, Object> m = getCommonModel(req);
 		req.setAttribute(config.getContentUrlAttribute(), megaModuleUrl);
         req.setAttribute(config.getContentDataAttribute(), service_cms.getCategoriesFull());
         return new ModelAndView(config.getTemplateUrl(),m);
@@ -332,8 +340,8 @@ public class PagesCmsDelegate {
 		}
 	}
 
-	public HashMap getCommonModel(HttpServletRequest req){
-		HashMap m = new HashMap();
+	public HashMap<String, Object> getCommonModel(HttpServletRequest req){
+		HashMap<String, Object> m = new HashMap<String, Object>();
 		m.put("title","Страницы");
 		m.put("top_header","Страницы");
 

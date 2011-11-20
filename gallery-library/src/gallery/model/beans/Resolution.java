@@ -25,7 +25,7 @@ public class Resolution {
 	private Integer width;
 	private Integer height;
 
-    private Long photo_count;
+    private Long wallpaper_count;
 
 	public Long getId() {return id;}
 	public void setId(Long id) {this.id = id;}
@@ -36,8 +36,8 @@ public class Resolution {
 	public Integer getHeight() {return height;}
 	public void setHeight(Integer height) {this.height = height;}
 
-	public Long getPhoto_count() {return photo_count;}
-	public void setPhoto_count(Long value) {this.photo_count = value;}
+	public Long getWallpaper_count() {return wallpaper_count;}
+	public void setWallpaper_count(Long value) {this.wallpaper_count = value;}
 
 	@Override
 	public int hashCode() {

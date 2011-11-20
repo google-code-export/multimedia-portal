@@ -19,22 +19,24 @@ package gallery.web.controller.cms;
 import common.cms.controller.FilteredCmsDelegate;
 import gallery.service.pages.IPagesService;
 import gallery.web.controller.pages.Config;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public class CommonPagesCmsDelegate extends FilteredCmsDelegate{
+public class CommonPagesCmsDelegate<T> extends FilteredCmsDelegate<T>{
 	protected IPagesService pages_service;
 	protected String id_pagesParamName;
 
 	@Override
-	public void getCommonModel(HttpServletRequest req) {
-		super.getCommonModel(req);
+	public Map<String, Object> getCommonModel(HttpServletRequest req) {
+		Map map = super.getCommonModel(req);
 
 		Long id_pages_nav = common.utils.RequestUtils.getLongParam(req, id_pagesParamName);
-		req.setAttribute(config.getNavigationDataAttribute(), pages_service.getAllPagesParents(id_pages_nav, Config.NAVIGATION_PSEUDONYMES));
+		map.put(config.getNavigationDataAttribute(), pages_service.getAllPagesParents(id_pages_nav, Config.NAVIGATION_PSEUDONYMES));
+		return map;
 	}
 
 	public void setPages_service(IPagesService service){this.pages_service = service;}

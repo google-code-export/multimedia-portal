@@ -19,6 +19,8 @@ package gallery.web.controller.cms;
 import common.cms.ICmsConfig;
 import core.service.IRubricImageService;
 import gallery.service.pages.IRubricationService;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import net.sf.ehcache.CacheManager;
@@ -40,8 +42,10 @@ public class CacheControlCms implements Controller{
 
     public static final String PARAM_REGION_NAME = "name";
 
-    private IRubricationService rubrication_service;
-    private IRubricImageService rubric_image_service;
+    protected IRubricationService rubrication_service;
+    protected IRubricImageService rubric_image_service;
+
+	protected CacheManager cacheManager;
 
 	protected ICmsConfig config;
 	protected String content_url;
@@ -51,6 +55,7 @@ public class CacheControlCms implements Controller{
 		StringBuilder sb = new StringBuilder();
 		common.utils.MiscUtils.checkNotNull(rubrication_service, "rubrication_service", sb);
 		common.utils.MiscUtils.checkNotNull(rubric_image_service, "rubric_image_service", sb);
+		common.utils.MiscUtils.checkNotNull(cacheManager, "cacheManager", sb);
 		common.utils.MiscUtils.checkNotNull(config, "config", sb);
 		common.utils.MiscUtils.checkNotNull(content_url, "content_url", sb);
 		common.utils.MiscUtils.checkNotNull(navigation_url, "navigation_url", sb);
@@ -83,19 +88,25 @@ public class CacheControlCms implements Controller{
 				common.CommonAttributes.addErrorMessage("operation_fail", request);
 			}
 		} if (PARAM_REGION_CLEAR.equals(do_param)){
-			String name = request.getParameter(PARAM_REGION_NAME);
-			if (name!=null){
-				Ehcache cache = getCacheManager().getEhcache(name);
-				if (cache==null){
-					common.CommonAttributes.addErrorMessage("operation_fail", request);
-				} else {
-					cache.removeAll();
-					common.CommonAttributes.addHelpMessage("operation_succeed", request);
+			String[] names = request.getParameterValues(PARAM_REGION_NAME);
+			Map<String, Boolean> result = new HashMap<String, Boolean>();
+			for (String name:names){
+				if (name!=null){
+					Ehcache cache = cacheManager.getEhcache(name);
+					if (cache==null){
+						result.put(name, Boolean.FALSE);
+						common.CommonAttributes.addErrorMessage("operation_fail", request);
+					} else {
+						result.put(name, Boolean.TRUE);
+						cache.removeAll();
+						common.CommonAttributes.addHelpMessage("operation_succeed", request);
+					}
 				}
 			}
+			request.setAttribute(config.getContentDataAttribute() ,result);
 		}
-        request.setAttribute("content_url",content_url);
-        request.setAttribute("navigation_url",navigation_url);
+        request.setAttribute(config.getContentUrlAttribute() ,content_url);
+        request.setAttribute(config.getNavigationUrlAttribute() ,navigation_url);
 
         request.setAttribute("title","Управление кешем");
         request.setAttribute("top_header","Управление кешем");
@@ -103,12 +114,10 @@ public class CacheControlCms implements Controller{
         return new ModelAndView(config.getTemplateUrl());
     }
 
-	public CacheManager getCacheManager(){
-		return CacheManager.getInstance();
-	}
-
 	public void setRubrication_service(IRubricationService value) {this.rubrication_service = value;}
 	public void setRubric_image_service(IRubricImageService value) {this.rubric_image_service = value;}
+
+	public void setCacheManager(CacheManager value){this.cacheManager = value;}
 
 	public void setConfig(ICmsConfig value){this.config = value;}
 	public void setContentUrl(String value){this.content_url = value;}

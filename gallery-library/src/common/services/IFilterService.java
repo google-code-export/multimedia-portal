@@ -30,14 +30,14 @@ public interface IFilterService<T> {
 	 * prepare attributes for update
 	 * @return map with attributes
 	 */
-	public Map initFilter();
+	public Map<String, Object> initFilter();
 
 	/**
 	 * bean that will be used for binding values on it
 	 *  and then saved to database
 	 * @return an object for filtering
 	 */
-	public IFilterBean getFilterBean();
+	public IFilterBean<T> getFilterBean();
 
 	/**
 	 * @param propertyName name of property to search by

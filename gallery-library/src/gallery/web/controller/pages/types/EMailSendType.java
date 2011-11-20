@@ -66,7 +66,7 @@ public class EMailSendType extends ASingleContentType{
 			common.CommonAttributes.addErrorMessage("form_errors", request);
 		}else{
 			command.setEmail_to(email_adresses);
-			mail_service.postMail(gallery.web.Config.SITE_NAME+": Email", command);
+			mail_service.postMail(gallery.web.Config.SITE_NAME+": "+command.getEmail_from(), command);
 			common.CommonAttributes.addHelpMessage("operation_succeed", request);
 		}
 		request.setAttribute(config.getContentDataAttribute(), command);

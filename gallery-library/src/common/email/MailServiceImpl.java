@@ -240,7 +240,7 @@ public class MailServiceImpl implements IMailService{
 			File f = res.getFile();
 			this.templatePath = f.getCanonicalPath() + "/";
 		} catch (IOException e){
-			throw new NullPointerException("folder not found for PhotoServiceImpl: "+res);
+			throw new NullPointerException("folder not found for Email templates: "+res);
 		}
 		//System.out.println("----------------------------path = "+this.path);
 	}
@@ -252,6 +252,6 @@ public class MailServiceImpl implements IMailService{
 	public boolean postMail(String subject, SendEmail command)
         throws IOException
 	{
-		return postMail(subject, command.getEmail_to(), command.getEmail_from(), command.getText());
+		return postMail(subject, command.getEmail_to(), getAutoanswerEmail(), command.getText());
 	}
 }

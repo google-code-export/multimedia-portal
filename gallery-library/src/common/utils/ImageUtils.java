@@ -170,7 +170,6 @@ public class ImageUtils {
         Graphics2D g2 = rez.createGraphics();
 		if (rez.getHeight()>image.getHeight()||rez.getWidth()>image.getWidth()){
 			//rez image is bigger no resize
-			// TODO: mb implement
 			g2.drawImage(image, 0, 0, null);
 			return;
 		}

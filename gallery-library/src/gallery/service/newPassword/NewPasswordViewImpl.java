@@ -98,14 +98,14 @@ public class NewPasswordViewImpl implements INewPasswordViewService{
 	}
 
 	@Override
-	public Map initInsert() {return null;}
+	public Map<String, Object> initInsert() {return null;}
 
 	public void setNew_passwordService(INewPasswordService value){this.new_password_service = value;}
 	public void setMailService(IMailService value){this.mail_service = value;}
 
 	@Override
 	public boolean applyNewPassword(String code) {
-		List<NewPassword> passwords = new_password_service.getShortByPropertyValueOrdered(null, "code", code, null, null);
+		List<NewPassword> passwords = new_password_service.getByPropertyValueOrdered(null, "code", code, null, null);
 		if (passwords==null||passwords.isEmpty()){
 			return false;
 		}else{

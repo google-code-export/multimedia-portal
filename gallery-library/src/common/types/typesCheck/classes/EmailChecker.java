@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  * @author demchuck.dima@gmail.com
  */
 public class EmailChecker implements ITypeChecker {
-    //TODO uncomment this to get email only with sub domain (.net,.kiev.ua,.com,...)
+    //uncomment this to get email only with sub domain (.net,.kiev.ua,.com,...)
     //private final Pattern pattern = Pattern.compile("[a-zA-Z0-9\u005F\u002E\u002D]+@[a-zA-Z0-9._-]+([.][a-zA-Z]{2,4})+");
     private final Pattern pattern = Pattern.compile("[a-zA-Z0-9\u005F\u002E\u002D]+@[a-zA-Z0-9._-]+");
 

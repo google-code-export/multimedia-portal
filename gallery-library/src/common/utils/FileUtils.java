@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
-import java.util.LinkedList;
 
 /**
  *
@@ -41,7 +40,7 @@ public class FileUtils {
 		'а','б','в','г','д','е','ж','з','и','к','л','м','н','о',
 		'п','р','с','т','у','ф','х','ц','ч' ,'ш' ,'щ' ,'y',
 		'э','ю','я','ы',
-		'@','^',':','.',',',';','!','(',')','-','[',']','?'};
+		'@','^',':','.',',',';','!','(',')','-','[',']'};
     public static final String[] replacement = {
         "_","q","w","e","r","t","y","u","i","o","p","a","s",
         "d","f","g","h","j","k","l","z","x","c","v","b","n","m",
@@ -49,7 +48,7 @@ public class FileUtils {
 		"a","b","v","g","d","e","j","z","i","k","l","m","n","o",
 		"p","r","s","t","u","f","h","c","ch","sh","sh","y",
 		"ye","yu","ya","i",
-		"@","^",":",".",",",";","!","(",")","-","[","]","?"};
+		"@","^",":",".",",",";","!","(",")","-","[","]"};
 
 	public static final Hashtable<Character,String> dictionary = new Hashtable<Character,String>();
 	static{
@@ -135,6 +134,44 @@ public class FileUtils {
 				out.write(buf, 0, len);
 			}
 			out.close();
+	}
+
+	/**
+	 * saves content of src into dst
+	 * uses NIO
+	 * WARNING: dst is not closed
+	 * @param src file with input data
+	 * @param dst output stream where to put data
+	 * @throws java.io.IOException
+	 */
+	public static void loadFromFileNew(File src, OutputStream dst)
+		throws IOException
+	{
+		java.io.FileInputStream fis = new java.io.FileInputStream(src);
+		java.nio.channels.WritableByteChannel wbc =  java.nio.channels.Channels.newChannel(dst);
+		fis.getChannel().transferTo(0, fis.available(), wbc);
+		fis.close();
+	}
+
+	/**
+	 * saves content of src into dst
+	 * uses IO
+	 * WARNING: dst is not closed
+	 * @param src file with input data
+	 * @param dst output stream where to put data
+	 * @throws java.io.IOException
+	 */
+	public static void loadFromFileOld(File src, OutputStream dst)
+		throws IOException
+	{
+		FileInputStream in  = new FileInputStream(src);
+		// Transfer bytes from in to out
+		byte[] buf = new byte[2048];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			dst.write(buf, 0, len);
+		}
+		in.close();
 	}
 
     /**

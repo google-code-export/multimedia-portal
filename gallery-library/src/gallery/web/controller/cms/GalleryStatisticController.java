@@ -16,28 +16,33 @@
 
 package gallery.web.controller.cms;
 
+import com.multimedia.service.wallpaper.IWallpaperService;
+import common.services.IStaticsService;
 import common.web.controller.StatisticController;
 import gallery.service.pages.IPagesService;
-import gallery.service.photo.IPhotoService;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.SortedMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
+import java.util.TreeMap;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public class GalleryStatisticController extends StatisticController{
-	private IPhotoService photo_service;
+public class GalleryStatisticController extends StatisticController implements IStaticsService{
+	private IWallpaperService wallpaper_service;
 	private IPagesService pages_service;
 	private String model_name;
+
+	protected final SortedMap<String, Long> statistics = Collections.synchronizedSortedMap(new TreeMap<String, Long>(Collections.reverseOrder()));
 
 	@Override
 	public void init(){
 		super.init();
 		StringBuilder sb = new StringBuilder();
-		common.utils.MiscUtils.checkNotNull(photo_service, "photo_service", sb);
+		common.utils.MiscUtils.checkNotNull(wallpaper_service, "wallpaper_service", sb);
 		common.utils.MiscUtils.checkNotNull(pages_service, "pages_service", sb);
 		common.utils.MiscUtils.checkNotNull(model_name, "model_name", sb);
 		if (sb.length()>0){
@@ -50,14 +55,24 @@ public class GalleryStatisticController extends StatisticController{
 			throws Exception
 	{
 		ModelAndView rez = super.handleRequest(request, response);
-        HashMap hm = new HashMap();
-        hm.put("photo_count", photo_service.getSinglePropertyU("count(*)"));
-        hm.put("pages_count", pages_service.getSinglePropertyU("count(*)"));
-		request.setAttribute(model_name, hm);
+		statistics.put("wallpaper_count", (Long)wallpaper_service.getSinglePropertyU("count(*)"));
+		statistics.put("pages_count", (Long)pages_service.getSinglePropertyU("count(*)"));
+		request.setAttribute(model_name, statistics);
 		return rez;
 	}
 
-	public void setPhoto_service(IPhotoService value) {this.photo_service = value;}
+
+	@Override
+	public void increaseStat(String statName, long value){
+		Long l = statistics.get(statName);
+		if (l==null){
+			statistics.put(statName, Long.valueOf(1));
+		} else {
+			statistics.put(statName, ++l);
+		}
+	}
+
+	public void setWallpaper_service(IWallpaperService value) {this.wallpaper_service = value;}
 	public void setPages_service(IPagesService value) {this.pages_service = value;}
 	public void setModel_name(String value){this.model_name = value;}
 }

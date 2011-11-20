@@ -34,7 +34,7 @@ public class PagesServiceImpl extends GenericServiceImpl<Pages, Long> implements
 	protected static final String[] ORDER_BY = new String[]{"type","sort","name"};
 	protected static final String[] ORDER_HOW = new String[]{"ASC","ASC","ASC"};
 
-	protected IPagesDAO pagesDAO;
+	protected IPagesDAO<Pages, Long> pagesDAO;
 
 	@Override
 	public void init(){
@@ -70,18 +70,18 @@ public class PagesServiceImpl extends GenericServiceImpl<Pages, Long> implements
 	}
 
 	@Override
-    public IPagesDAO getDao() {return pagesDAO;}
-	public void setDao(IPagesDAO dao){
+    public IPagesDAO<Pages, Long> getDao() {return pagesDAO;}
+	public void setDao(IPagesDAO<Pages, Long> dao){
 		super.dao = dao;
 		this.pagesDAO = dao;
 	}
 	@Override
-	public void setDao(IGenericDAO dao){
+	public void setDao(IGenericDAO<Pages, Long> dao){
 		super.dao = dao;
-		this.pagesDAO = (IPagesDAO) dao;
+		this.pagesDAO = (IPagesDAO<Pages, Long>) dao;
 	}
 
-	protected static final String[] ALL_SHORT_CMS =  new String[]{"id","name","sort","active", "last","type"};
+	protected static final String[] ALL_SHORT_CMS =  new String[]{"id","name","sort","active","last","type"};
 	@Override
 	public List<Pages> getAllShortCms() {
 		return dao.getAllShortOrdered(ALL_SHORT_CMS,ORDER_BY,ORDER_HOW);
@@ -283,8 +283,8 @@ public class PagesServiceImpl extends GenericServiceImpl<Pages, Long> implements
 	}
 
 	@Override
-	public List<Pages> getShortByPropertiesValueOrdered(String[] propNames, String[] propertyName, Object[] propertyValue) {
-		return super.getShortByPropertiesValueOrdered(propNames, propertyName, propertyValue, ORDER_BY, ORDER_HOW);
+	public List<Pages> getShortByPropertiesValuesOrdered(String[] propNames, String[] propertyName, Object[][] propertyValue) {
+		return super.getByPropertiesValuesOrdered(propNames, propertyName, propertyValue, ORDER_BY, ORDER_HOW);
 	}
 
 }

@@ -17,7 +17,6 @@
 package gallery.model.beans;
 
 import java.util.List;
-import java.util.Vector;
 
 /**
  *
@@ -28,9 +27,9 @@ public class Autoreplace{
     private String code;
 
     private Long sort;
-    private Boolean active;
+    private Boolean active = Boolean.FALSE; //TODO: remove initialization and make normal binding
 
-	private List<AutoreplaceL> localizations = new Vector(0);
+	private List<AutoreplaceL> localizations;
 
 	public Long getId() {return id;}
 	public void setId(Long id) {this.id = id;}
@@ -42,7 +41,10 @@ public class Autoreplace{
 	public void setSort(Long sort) {this.sort = sort;}
 
 	public Boolean getActive() {return active;}
-	public void setActive(Boolean active) {this.active = active;}
+	public void setActive(Boolean active) {
+		this.active = active;
+		//System.out.println("active = "+active);
+	}
 
     public String getActiveHtml() {
         if (Boolean.TRUE.equals(active))

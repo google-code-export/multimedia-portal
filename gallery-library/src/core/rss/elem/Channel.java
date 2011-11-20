@@ -12,7 +12,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  under the License.
  */
 
 package core.rss.elem;
@@ -77,7 +76,7 @@ public class Channel {
     private String webMaster;
     private Date pubDate;
     private Date lastBuildDate;
-    private List categories;
+    private List<Channel.Category> categories;
     private String generator;
     private String docs;
     private Cloud cloud;
@@ -88,7 +87,7 @@ public class Channel {
     private String skipHours;
     private byte skipDays;
     
-    private List items;
+    private List<Item> items;
     
     // Constructors
     /**
@@ -113,8 +112,8 @@ public class Channel {
         this.description = description;
         this.docs = DOCS;
         this.generator = GENERATOR;
-        this.categories = new ArrayList();
-        this.items = new ArrayList();
+        this.categories = new ArrayList<Channel.Category>();
+        this.items = new ArrayList<Item>();
     }
 
     // Getters and Setters

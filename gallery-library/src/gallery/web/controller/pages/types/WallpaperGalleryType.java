@@ -23,12 +23,13 @@ import common.beans.PagerBeanId;
 import common.utils.RequestUtils;
 import core.service.IRubricImageService;
 import gallery.model.beans.Pages;
-import gallery.model.beans.Photo;
+import gallery.model.beans.Resolution;
+import gallery.model.beans.Wallpaper;
 import gallery.service.pages.IPagesService;
 import gallery.service.pagesPseudonym.IPagesPseudonymService;
 import gallery.web.controller.pages.submodules.EmptySubmodule;
 import gallery.web.controller.pages.submodules.ASubmodule;
-import gallery.web.support.PaginatedListUtils;
+import com.multimedia.web.support.PaginatedListUtils;
 import gallery.web.support.pages.Utils;
 import java.util.HashMap;
 import java.util.List;
@@ -36,12 +37,14 @@ import java.util.Map;
 import java.util.Vector;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
 public class WallpaperGalleryType extends AWallpaperType{
+	Logger logger = Logger.getLogger(this.getClass());
     /** string constant that represents type for this page */
     public static final String TYPE="general_wallpaper_gallery";
 	/** rus type */
@@ -55,23 +58,23 @@ public class WallpaperGalleryType extends AWallpaperType{
 	/** attribute for storing categories vector for view */
 	public static final String CATEGORIES_ATTRIBUTE = "categories";
 	/** attribute for storing categories vector for view */
-	public static final String PHOTOS_ATTRIBUTE = "photos";
+	public static final String WALLPAPERS_ATTRIBUTE = "wallpapers";
 	/** attribute for storing categories vector for view */
 	public static final String PAGENATION_ATTRIBUTE = "count";
-	public static final String CUR_PHOTO_ATTRIBUTE = "big_photo";
+	public static final String CUR_WALLPAPER_ATTRIBUTE = "big_wallpaper";
 	public static final String CUR_PAGE_NUMBER_ATTRIBUTE = "cur_page_number";
 	public static final String OPTIMIZATION_STRINGS_FULL = "wallpaper_optmization_full";
 	public static final String OPTIMIZATION_STRINGS_SHORT = "wallpaper_optmization_short";
 	public static final String OPTIMIZATION_STRINGS_TAGS = "wallpaper_optmization_tags";
-	/** details (after clicking on a photo of a category) */
+	/** details (after clicking on a wallpaper of a category) */
 	public static final int DETAILS_NAV_BUTTONS = 2;
     /** quantity of wallpapers(items) that will be showen in category */
     public static final int CATEGORY_WALLPAPERS = 15;
 	/** main view of a category */
 	public static final PaginatedListUtils paginatedListUtilsCategory = new PaginatedListUtils(CATEGORY_WALLPAPERS ,2);
-	//first and last photo
-	private Long FIRST_PHOTO_PARAM = new Long(-1);
-	private Long LAST_PHOTO_PARAM = new Long(-2);
+	//first and last wallpaper
+	private Long FIRST_PARAM = Long.valueOf(-1);
+	private Long LAST_PARAM = Long.valueOf(-2);
 
 	/** for keeping parameters */
 	private KeepParameters detailsKeepParameters;
@@ -88,11 +91,11 @@ public class WallpaperGalleryType extends AWallpaperType{
 	protected String infoTopMainUrl;
 	protected String infoBottomMainUrl;
 
-	/** if has no child pages and an id_photo param is passed */
+	/** if has no child pages and an wallpaper param is passed */
 	protected String contentDetailsUrl;
 	protected String optimizationDetailsUrl;
 
-	/** if has no child pages and no id_photo param is passed */
+	/** if has no child pages and no wallpaper param is passed */
 	protected String contentCategoryUrl;
 	protected String optimizationCategoryUrl;
 	protected String infoTopCategoryUrl;
@@ -140,16 +143,18 @@ public class WallpaperGalleryType extends AWallpaperType{
 			main(request, response, categories, url);
 		} else {
 			//determining if we need details ...
-			Long id_photo = RequestUtils.getLongParam(request, "id_photo_nav");
-			int totalCount = photoService.getPhotosRowCount(p.getId()).intValue();
-			if (id_photo==null){
+			Long id_wallpaper = RequestUtils.getLongParam(request, "id_photo_nav");
+			int totalCount = wallpaperService.getWallpapersRowCount(p.getId()).intValue();
+			if (id_wallpaper==null){
+				//logger.info("Pages --> category; id="+p.getId()+"; count = "+totalCount);
 				category(request, response, p, navigation, totalCount, url);
 			}else{
-				details(request, response, id_photo, p, navigation, totalCount, url);
+				//logger.info("Pages --> details; id="+p.getId()+"; count = "+totalCount);
+				details(request, response, id_wallpaper, p, navigation, totalCount, url);
 				Map<String, ASubmodule> hs = url.getSubmodules();
-				hs = (hs==null?new HashMap():hs);
-				hs.put(PhotoRateType.TYPE, new EmptySubmodule());
-				hs.put(PhotoCommentAddType.TYPE, new EmptySubmodule());
+				hs = (hs==null?new HashMap<String, ASubmodule>():hs);
+				hs.put(WallpaperRateType.TYPE, new EmptySubmodule());
+				hs.put(WallpaperCommentAddType.TYPE, new EmptySubmodule());
 				url.setSubmodules(hs);
 			}
 		}
@@ -159,7 +164,7 @@ public class WallpaperGalleryType extends AWallpaperType{
 		throws Exception
 	{
 		request.setAttribute(CATEGORIES_ATTRIBUTE, categories);
-		request.setAttribute(PHOTOS_ATTRIBUTE, rubricImageService.getImageUrls(categories));
+		request.setAttribute(WALLPAPERS_ATTRIBUTE, rubricImageService.getImageUrls(categories));
 
 		url.setContent(contentMainUrl);
 		url.setOptimization(optimizationMainUrl);
@@ -170,61 +175,62 @@ public class WallpaperGalleryType extends AWallpaperType{
 	public static final String[] DET_RES_WHERE = new String[]{"width", "height"};
 	public static final String[] DET_RES_RELAT = new String[]{"<=", "<="};
 	public void details(HttpServletRequest request,javax.servlet.http.HttpServletResponse response,
-			Long id_photo, Pages p, List<Pages> navigation, int totalCount, UrlBean url)
+			Long id_wallpaper, Pages p, List<Pages> navigation, int totalCount, UrlBean url)
 	{
 		//creating bean for pagination
 		PagerBeanId count = new PagerBeanId();
 		count.setCurPageParam("id_photo_nav");
 		count.setItemsCount(totalCount);
 		count.setQueryString(detailsKeepParameters.getKeepParameters(request));
-		//finding an id_photo if it is first or last page
-		Long id_photo2;
-		if (id_photo.equals(FIRST_PHOTO_PARAM)){
-			id_photo2 = (Long)photoService.getSinglePropertyU("min(id)", DETAILS_WHERE, new Object[]{p.getId(),Boolean.TRUE}, 0);
-		} else if (id_photo.equals(LAST_PHOTO_PARAM)){
-			id_photo2 = (Long)photoService.getSinglePropertyU("max(id)", DETAILS_WHERE, new Object[]{p.getId(),Boolean.TRUE}, 0);
+		//finding an id_wallpaper if it is first or last page
+		Long id_wallpaper2;
+		if (id_wallpaper.equals(FIRST_PARAM)){
+			id_wallpaper2 = (Long)wallpaperService.getSinglePropertyU("min(id)", DETAILS_WHERE, new Object[]{p.getId(),Boolean.TRUE}, 0);
+		} else if (id_wallpaper.equals(LAST_PARAM)){
+			id_wallpaper2 = (Long)wallpaperService.getSinglePropertyU("max(id)", DETAILS_WHERE, new Object[]{p.getId(),Boolean.TRUE}, 0);
 		} else {
-			id_photo2 = id_photo;
+			id_wallpaper2 = id_wallpaper;
 		}
-		Photo cur_photo = photoService.getById(id_photo2==null?id_photo:id_photo2);
-		if ((cur_photo==null)||(!cur_photo.getId_pages().equals(p.getId()))){
-			//and set an error if this photo not exists or is not from this pages
-			CommonAttributes.addErrorMessage("not_exists.photo", request);
+		Wallpaper cur_wallpaper = wallpaperService.getById(id_wallpaper2==null?id_wallpaper:id_wallpaper2);
+		if ((cur_wallpaper==null)||(!cur_wallpaper.getId_pages().equals(p.getId()))){
+			//and set an error if this wallpaper not exists or is not from this pages
+			CommonAttributes.addErrorMessage("not_exists.wallpaper", request);
 			category(request, response, p, navigation, totalCount, url);
 			return;
 		}
-		//setting resolutions to be avaible with current photo
-		List res = resolutionService.getByPropertiesValuePortionOrdered(null, null,
-				DET_RES_WHERE, DET_RES_RELAT, new Object[]{cur_photo.getWidth(), cur_photo.getHeight()},
+		//setting resolutions to be avaible with current wallpaper
+		List<Resolution> res = resolutionService.getByPropertiesValuePortionOrdered(null, null,
+				DET_RES_WHERE, DET_RES_RELAT, new Object[]{cur_wallpaper.getWidth(), cur_wallpaper.getHeight()},
 				0, 0, gallery.web.controller.resolution.Config.ORDER_BY, gallery.web.controller.resolution.Config.ORDER_HOW);
-		cur_photo.setResolutions(res);
-		//get page of current photo
-		Long cur_number = photoService.getPhotoNumber(cur_photo);
-		request.setAttribute(CUR_PAGE_NUMBER_ATTRIBUTE, (cur_number-1)/paginatedListUtilsCategory.getPageSize());
+		cur_wallpaper.setResolutions(res);
+		wallpaperService.updatePropertyById("views", Long.valueOf(1), id_wallpaper2);
+		//get page of current wallpaper
+		Long cur_number = wallpaperService.getWallpaperNumber(cur_wallpaper);
+		request.setAttribute(CUR_PAGE_NUMBER_ATTRIBUTE, (cur_number-1)/paginatedListUtilsCategory.getItemsPerPage());
 
-		//selecting left and right phoytos for pagination
-		List<Photo> photos_left = photoService.getPhotosPaginatedId(cur_photo.getId(), -DETAILS_NAV_BUTTONS, p.getId());
-		List<Photo> photos_right = photoService.getPhotosPaginatedId(cur_photo.getId(), DETAILS_NAV_BUTTONS, p.getId());
+		//selecting left and right wallpapers for pagination
+		List<Wallpaper> wallpapers_left = wallpaperService.getWallpapersPaginatedId(cur_wallpaper.getId(), -DETAILS_NAV_BUTTONS, p.getId());
+		List<Wallpaper> wallpapers_right = wallpaperService.getWallpapersPaginatedId(cur_wallpaper.getId(), DETAILS_NAV_BUTTONS, p.getId());
 
-		//setting photos collection
-		Vector<Photo> photos = new Vector(2*DETAILS_NAV_BUTTONS+1);
-		for (int i=0, size=DETAILS_NAV_BUTTONS-photos_left.size();i<size;i++)	photos.add(null);
+		//setting wallpapers collection
+		Vector<Wallpaper> wallpapers = new Vector<Wallpaper>(2*DETAILS_NAV_BUTTONS+1);
+		for (int i=0, size=DETAILS_NAV_BUTTONS-wallpapers_left.size();i<size;i++)	wallpapers.add(null);
 		//reverting collection ...
-		for (int k=photos_left.size();k>0;)		photos.add(photos_left.get(--k));
-		photos.add(cur_photo);
-		photos.addAll(photos_right);
-		for (int i=0, size=DETAILS_NAV_BUTTONS-photos_right.size();i<size;i++)	photos.add(null);
+		for (int k=wallpapers_left.size();k>0;)		wallpapers.add(wallpapers_left.get(--k));
+		wallpapers.add(cur_wallpaper);
+		wallpapers.addAll(wallpapers_right);
+		for (int i=0, size=DETAILS_NAV_BUTTONS-wallpapers_right.size();i<size;i++)	wallpapers.add(null);
 		//setting navigation buttons
-		if (photos_left.size()>0)	count.setPrevPage(photos_left.get(0).getId());
-		else						count.setPrevPage(LAST_PHOTO_PARAM);
-		if (photos_right.size()>0)	count.setNextPage(photos_right.get(0).getId());
-		else						count.setNextPage(FIRST_PHOTO_PARAM);
-		count.setCurrentPage(cur_photo.getId());
-		count.setLastPage(LAST_PHOTO_PARAM);
-		count.setFirstPage(FIRST_PHOTO_PARAM);
-		//saving photos in request attributes
-		request.setAttribute(CUR_PHOTO_ATTRIBUTE, cur_photo);
-		request.setAttribute(PHOTOS_ATTRIBUTE, photos);
+		if (wallpapers_left.size()>0)	count.setPrevPage(wallpapers_left.get(0).getId());
+		else						count.setPrevPage(LAST_PARAM);
+		if (wallpapers_right.size()>0)	count.setNextPage(wallpapers_right.get(0).getId());
+		else						count.setNextPage(FIRST_PARAM);
+		count.setCurrentPage(cur_wallpaper.getId());
+		count.setLastPage(LAST_PARAM);
+		count.setFirstPage(FIRST_PARAM);
+		//saving wallpapers in request attributes
+		request.setAttribute(CUR_WALLPAPER_ATTRIBUTE, cur_wallpaper);
+		request.setAttribute(WALLPAPERS_ATTRIBUTE, wallpapers);
 		request.setAttribute(PAGENATION_ATTRIBUTE, count);
 		//creating url bean
 		url.setContent(contentDetailsUrl);
@@ -238,13 +244,13 @@ public class WallpaperGalleryType extends AWallpaperType{
 		PagerBean count = paginatedListUtilsCategory.getPagerBean2(cur_page_num, totalCount,
 				categoryKeepParameters.getKeepParameters(request));
 
-		int first_item = count.getCurrentPage()*paginatedListUtilsCategory.getPageSize();
-		List<Photo> photos = photoService.getPhotosPaginated(first_item,
+		int first_item = count.getCurrentPage()*paginatedListUtilsCategory.getItemsPerPage();
+		List<Wallpaper> wallpapers = wallpaperService.getWallpapersPaginated(first_item,
 				//paginatedListUtilsCategory.getPageSize(), subpages);
-				paginatedListUtilsCategory.getPageSize(), p.getId());
+				paginatedListUtilsCategory.getItemsPerPage(), p.getId());
 
-		request.setAttribute(PHOTOS_ATTRIBUTE, photos);
-		request.setAttribute(PAGENATION_ATTRIBUTE,count);
+		request.setAttribute(WALLPAPERS_ATTRIBUTE, wallpapers);
+		request.setAttribute(PAGENATION_ATTRIBUTE, count);
         setOptimization(cur_page_num, navigation, request);
 		url.setContent(contentCategoryUrl);
 		if (cur_page_num==0){

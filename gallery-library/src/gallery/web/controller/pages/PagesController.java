@@ -26,8 +26,8 @@ import gallery.service.pages.IPagesServiceView;
 import gallery.service.pages.IRubricationService;
 import gallery.web.controller.pages.submodules.EmptySubmodule;
 import gallery.web.controller.pages.submodules.ASubmodule;
-import gallery.web.controller.pages.types.APagesType;
-import gallery.web.controller.pages.types.IPagesType;
+import com.multimedia.core.pages.types.APagesType;
+import com.multimedia.core.pages.types.IPagesType;
 import gallery.web.controller.pages.types.UrlBean;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,6 +48,21 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  */
 public class PagesController implements Controller{
 	protected final Logger logger = Logger.getLogger(getClass());
+//-------------------------------------------------------------------------------------------------------------
+	public static final String COUNTERS_ATTRIBUTE = "counters";
+	public static final String ADVERTISEMENT_ATTRIBUTE = "advertisement";
+	public static final String RUBRICATOR_ATTRIBUTE = "rubrication";
+
+	//TODO: remake as random_wallpaper_gallery in WallpaperGalleryType
+	public static final Map<String, ASubmodule> COMMON_SUBMODULES;
+	static{
+		COMMON_SUBMODULES = new HashMap<String, ASubmodule>();
+		COMMON_SUBMODULES.put(gallery.web.controller.pages.types.UserType.TYPE, new EmptySubmodule());
+		//TODO: uncomment
+		//COMMON_SUBMODULES.put(gallery.web.controller.pages.types.ErrorType.TYPE,  new EmptySubmodule());
+		//COMMON_SUBMODULES.put(gallery.web.controller.pages.types.WallpaperAddType.TYPE,  new EmptySubmodule());
+	}
+//-------------------------------------------------------------------------------------------------------------
 	/** config class is used to store some constants */
 	protected Config config;
 	/** types of pages that will be handled */
@@ -91,15 +106,13 @@ public class PagesController implements Controller{
 		}
 	}
 
-	public static final String COUNTERS_ATTRIBUTE = "counters";
-
 	@Override
 	public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws Exception
 	{
-		String lang = RequestContextUtils.getLocaleResolver(request).resolveLocale(request).getLanguage();
+		String lang = RequestContextUtils.getLocale(request).getLanguage();
 		//getting current page
-		Pages page = getCurPage(request.getParameter(config.getId_pagesParamName()), request);
+		Pages page = getCurPage(request);
 
 		request.setAttribute(Config.CURRENT_PAGE_ATTRIBUTE, page);
 
@@ -114,7 +127,7 @@ public class PagesController implements Controller{
 
 			url = getType(page).execute(request, response);
 
-			//if url == null that meens that we do not need to render any view in thid method
+			//if url == null that meens that we do not need to render any view in this method
 			// and thus we do not need to load any submodules, rubrications etc
 			if (url!=null){
 				makeReplacement(page, lang);
@@ -124,6 +137,7 @@ public class PagesController implements Controller{
 				createRubrication(request, page);
 
 				request.setAttribute(COUNTERS_ATTRIBUTE, pagesViewService.getCounters());
+				request.setAttribute(ADVERTISEMENT_ATTRIBUTE, pagesViewService.getAdvertisementForPage(page.getId()));
 			}
 		}
 		if (url==null){
@@ -134,14 +148,6 @@ public class PagesController implements Controller{
 		}
 	}
 
-	//TODO: remake as random_wallpaper_gallery in WallpaperGalleryType
-	public static final Map<String, ASubmodule> COMMON_SUBMODULES;
-	static{
-		COMMON_SUBMODULES = new HashMap<String, ASubmodule>();
-		COMMON_SUBMODULES.put(gallery.web.controller.pages.types.UserType.TYPE, new EmptySubmodule());
-		COMMON_SUBMODULES.put(gallery.web.controller.pages.types.ErrorType.TYPE,  new EmptySubmodule());
-		COMMON_SUBMODULES.put(gallery.web.controller.pages.types.PhotoAddType.TYPE,  new EmptySubmodule());
-	}
 	protected void loadSubmodules(List<Pages> navigation, HttpServletRequest request, Map<String, ASubmodule> submodules){
 		if (submodules!=null){
 			Iterator<Entry<String,ASubmodule>> i = COMMON_SUBMODULES.entrySet().iterator();
@@ -155,7 +161,7 @@ public class PagesController implements Controller{
 		if (security.Utils.getCurrentUser(request)==null){
 			submodules.put(gallery.web.controller.pages.types.RecoverPassType.TYPE,  new EmptySubmodule());
 		} else {
-			submodules.put(gallery.web.controller.pages.types.PhotoListType.TYPE,  new EmptySubmodule());
+			submodules.put(gallery.web.controller.pages.types.WallpaperListType.TYPE,  new EmptySubmodule());
 		}
 		submodules.put(gallery.web.controller.pages.types.EMailSendType.TYPE, new EmptySubmodule());
 		pagesService.activateSubmodules(navigation, submodules);
@@ -172,30 +178,67 @@ public class PagesController implements Controller{
 		}
 	}
 
-    protected Pages getCurPage(String id, HttpServletRequest request){
-		if (id==null){
-			Pages p = pagesViewService.getMainPage();
-            pagesService.deattach(p);
-			return p;
+	/**
+	 * must return page based on received request
+	 * @param request
+	 * @return
+	 */
+    protected Pages getCurPage(HttpServletRequest request){
+		//first trying to load from request parameter
+		String id = request.getParameter(config.getId_pagesParamName());
+		Pages p = null;
+		if (id!=null){
+			try{
+				p = pagesService.getById( Long.parseLong(id, 10) );
+			}catch(NumberFormatException e){
+				//silent catch
+			}
+			if (p==null||!p.getActive()){
+				CommonAttributes.addErrorMessage("not_exists.page", request);
+			}
 		}
-		Long _id = null;
-		try{
-			_id = Long.parseLong(id,10);
-		}catch(Exception e){
-			_id = null;
+		if (id==null||p==null||!p.getActive()){
+			//1-st trying to load from url
+			/*String url = request.getServletPath();
+			if (request.getPathInfo()!=null){
+				url+=request.getPathInfo();
+			}
+			Long _id = getPageFromUrl(url.substring(1));
+			if (_id==null){*/
+				p = pagesViewService.getMainPage();
+			/*} else {
+				p = pagesService.getById(_id);
+			}*/
 		}
-		if (_id!=null){
-			Pages p = pagesService.getById(_id);
-            if (p!=null&&p.getActive()){
-                pagesService.deattach(p);
-                return p;
-            }
-		}
-        CommonAttributes.addErrorMessage("not_exists.page", request);
-		Pages p = pagesViewService.getMainPage();
 		pagesService.deattach(p);
 		return p;
     }
+
+	protected Long getPageFromUrl(String url){
+		String[] paths = url.split("/");
+		//TODO: remake
+		if (paths.length>1&&paths[paths.length-1].equals("index.htm"))
+			paths[paths.length-1] = null;
+		Long _id = null;
+		final String[] where = new String[]{"id_pages","name"};
+		Object[] values = new Object[2];
+		for (String name:paths){
+			Long tmp_id = null;
+			if (name!=null){
+				values[0] = _id;
+				values[1] = name;
+				tmp_id = (Long)pagesService.getSinglePropertyU("id", where, values, 0);
+			}
+			if (tmp_id==null){
+				break;
+			} else {
+				_id = tmp_id;
+			}
+		}
+		logger.info("servlet = "+url);
+		logger.info("_id = "+_id);
+		return _id;
+	}
 
 	protected void makeReplacement(Pages p, String lang){
 		IAutoreplaceService.IReplacement repl = autoreplaceService.getAllReplacements(lang);
@@ -206,10 +249,8 @@ public class PagesController implements Controller{
 		p.setInfo_bottom(repl.replaceAll(p.getInfo_bottom()));
 	}
 
-	public static final String RUBRICATOR_ATTRIBUTE = "rubrication";
 	protected void createRubrication(HttpServletRequest request, Pages p){
-        List<Pages> pages = rubrication_service.getCurrentBranch(p.getId());
-		request.setAttribute(RUBRICATOR_ATTRIBUTE, pages);
+		request.setAttribute(RUBRICATOR_ATTRIBUTE, rubrication_service.getCurrentBranch(p.getId()));
 	}
 
 	/**

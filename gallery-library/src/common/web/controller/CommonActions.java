@@ -41,9 +41,9 @@ public class CommonActions {
 	 * @param val for validation
 	 * @param req resulting model (i.e. errors, command objects ...) will be placed here
 	 */
-	public static void doFilteredSelect(IFilterService service, IControllerConfig config, ABindValidator val, HttpServletRequest req){
+	public static <T> void doFilteredSelect(IFilterService<T> service, IControllerConfig config, ABindValidator val, HttpServletRequest req){
 		RequestUtils.copyRequestAttributesFromMap(req, service.initFilter());
-		IFilterBean command = service.getFilterBean();
+		IFilterBean<T> command = service.getFilterBean();
 
 		BindingResult res = val.bindAndValidate(command, req);
 
@@ -68,9 +68,9 @@ public class CommonActions {
 	 * @param val for validation
 	 * @param req resulting model (i.e. errors, command objects ...) will be placed here
 	 */
-	public static boolean doInsert(IInsertService service, IControllerConfig config, ABindValidator val, HttpServletRequest req){
+	public static <T> boolean doInsert(IInsertService<T> service, IControllerConfig config, ABindValidator val, HttpServletRequest req){
 		String action = req.getParameter(ControllerConfig.ACTION_PARAM_NAME);
-		Object command = service.getInsertBean();
+		T command = service.getInsertBean();
 		RequestUtils.copyRequestAttributesFromMap(req, service.initInsert());
 
 		if ("insert".equals(action)){
@@ -102,9 +102,9 @@ public class CommonActions {
 	 * @param req
 	 * @return false if id cannot be converted to long or where is no command with an appropriate id
 	 */
-	public static boolean doUpdate(IUpdateService service, IControllerConfig config, ABindValidator val, HttpServletRequest req){
+	public static <T> boolean doUpdate(IUpdateService<T, Long> service, IControllerConfig config, ABindValidator val, HttpServletRequest req){
 		Long id = RequestUtils.getLongParam(req, "id");
-		Object command = null;
+		T command = null;
 		if (id!=null){
 			command = service.getUpdateBean(id);
 		}
@@ -141,7 +141,7 @@ public class CommonActions {
 	 * @param req
 	 * @return false if id cannot be converted to long
 	 */
-	public static boolean doDelete(IDeleteService service, HttpServletRequest req){
+	public static boolean doDelete(IDeleteService<Long> service, HttpServletRequest req){
 		Long id = RequestUtils.getLongParam(req, "id");
 		if (id==null){
 			common.CommonAttributes.addErrorMessage("form_errors", req);

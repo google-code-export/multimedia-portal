@@ -40,5 +40,5 @@ public interface IInsertService<T> {
 	 * here you can make all required attributes for insert (such as data for comboboxes ...)
 	 * @return map where with required attributes
 	 */
-	public Map initInsert();
+	public Map<String, Object> initInsert();
 }

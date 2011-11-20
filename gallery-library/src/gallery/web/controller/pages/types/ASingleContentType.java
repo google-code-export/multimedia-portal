@@ -16,6 +16,8 @@
 
 package gallery.web.controller.pages.types;
 
+import com.multimedia.core.pages.types.APagesType;
+
 /**
  * this class provides a variable for setting content url
  * @author demchuck.dima@gmail.com

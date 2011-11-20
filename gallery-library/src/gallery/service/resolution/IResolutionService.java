@@ -19,11 +19,10 @@ package gallery.service.resolution;
 import common.services.IDeleteService;
 import common.services.generic.IGenericService;
 import gallery.model.beans.Resolution;
-import java.io.Serializable;
 
 /**
  *
  * @author demchuck.dima@gmail.com
  */
-public interface IResolutionService<T extends Resolution, ID extends Serializable> extends IGenericService<T, ID>, IDeleteService<ID>{
+public interface IResolutionService extends IGenericService<Resolution, Long>, IDeleteService<Long>{
 }

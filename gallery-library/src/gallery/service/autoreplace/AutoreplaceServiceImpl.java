@@ -16,11 +16,11 @@
 
 package gallery.service.autoreplace;
 
-import com.netstorm.localization.LocaleId;
-import common.services.generic.GenericServiceImpl;
+import common.services.generic.GenericLocalizedServiceImpl;
+import gallery.model.beans.Autoreplace;
 import gallery.model.beans.AutoreplaceL;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,9 +28,9 @@ import java.util.regex.Pattern;
  *
  * @author demchuck.dima@gmail.com
  */
-public class AutoreplaceServiceImpl extends GenericServiceImpl<AutoreplaceL, Long> implements IAutoreplaceService{
-	public static final String[] WHERE_NAMES = new String[]{"active", "lang"};
-	public static final String[] ORDER_BY = new String[]{"parent.sort"};
+public class AutoreplaceServiceImpl extends GenericLocalizedServiceImpl<AutoreplaceL, Long, Autoreplace, Long> implements IAutoreplaceService{
+	public static final String[] WHERE_NAMES = new String[]{"localeParent.active", "lang"};
+	public static final String[] ORDER_BY = new String[]{"localeParent.sort"};
 	public static final String[] ORDER_HOW = new String[]{"asc"};
 
 	/**
@@ -42,10 +42,10 @@ public class AutoreplaceServiceImpl extends GenericServiceImpl<AutoreplaceL, Lon
 		//connects to a DB and gets new values and names from there
 		List<AutoreplaceL> data=dao.getByPropertiesValuePortionOrdered(
 				null, null, WHERE_NAMES, new Object[]{Boolean.TRUE, lang}, 0, -1, ORDER_BY, ORDER_HOW);
-		List<String> values=new Vector<String>(data.size());
-		List<Pattern> names_pattern=new Vector<Pattern>(data.size());
+		List<String> values=new ArrayList<String>(data.size());
+		List<Pattern> names_pattern=new ArrayList<Pattern>(data.size());
 		for (int i=0;i<data.size();i++){
-			names_pattern.add(Pattern.compile(Pattern.quote(data.get(i).getParent().getCode())));
+			names_pattern.add(Pattern.compile(Pattern.quote(data.get(i).getLocaleParent().getCode())));
 			values.add(data.get(i).getText());
 		}
 		return new Replacement(values, names_pattern);
@@ -63,7 +63,7 @@ public class AutoreplaceServiceImpl extends GenericServiceImpl<AutoreplaceL, Lon
 		
 		@Override
 		public String replaceAll(String str){
-			if (str==null||values==null||values.size()==0)
+			if (str==null||values==null||values.isEmpty())
 				return str;
 			boolean notReplaced=true;
 			String rez=str;
